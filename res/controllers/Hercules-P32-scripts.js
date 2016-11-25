@@ -648,7 +648,13 @@ P32.init = function () {
     midi.sendShortMsg(0xB0, 0x7F, 0x7F);
 };
 
-P32.shutdown = function () {};
+P32.shutdown = function () {
+    for (var channel = 0; channel <= 5; channel++) {
+        for (var button = 1; button <= 0x63; button++) {
+            midi.sendShortMsg(0x90 + channel, button, 0);
+        }
+    }
+};
 
 P32.shiftOffset = 3;
 
