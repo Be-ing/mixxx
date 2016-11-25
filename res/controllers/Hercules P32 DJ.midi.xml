@@ -1084,6 +1084,15 @@
                 </options>
             </control>
             <control>
+                <group>[Recording]</group>
+                <key>P32.slip.input</key>
+                <status>0x90</status>
+                <midino>0x03</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
                 <group>[Channel1]</group>
                 <key>P32.leftDeck.tempoPress</key>
                 <status>0x91</status>

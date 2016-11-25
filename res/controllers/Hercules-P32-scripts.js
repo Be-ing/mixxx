@@ -679,19 +679,42 @@ P32.headMix = function (channel, control, value, status, group) {
 };
 
 P32.record = new Control([0x90, 0x02], '[Recording]',
-                         null,
+                         ['toggle_recording'],
                          ['status', function (val) {return val * 127;} ]);
-P32.record.input = function (channel, control, value, status, group) {
+
+P32.slip = new Control([0x90, 0x03], '[Channel1]',
+                       null, null);
+P32.slip.input = function (channel, control, value, status, group) {
     if (value === 127) {
         if (P32.leftDeck.shift) {
             P32.leftDeck.toggle();
         } else if (P32.rightDeck.shift) {
             P32.rightDeck.toggle();
         } else {
-            script.toggleControl('[Recording]', 'toggle_recording');
+            for (var d = 1; d <= 4; d++) {
+                script.toggleControl('[Channel' + d + ']', 'slip_enabled');
+            }
         }
     }
 };
+P32.slip.output = function (value, group, control) {
+        var slipEnabledOnAnyDeck = false;
+        for (var d = 1; d <= 4; d++) {
+            if (engine.getValue('[Channel' + d + ']', 'slip_enabled')) {
+                slipEnabledOnAnyDeck = true;
+                break;
+            }
+        }
+        this.send(slipEnabledOnAnyDeck ? 127 : 0);
+};
+P32.slip.connect = function () {
+        for (var d = 1; d <= 4; d++) {
+            this.connections.push(
+                engine.connectControl('[Channel' + d + ']', 'slip_enabled', P32.slip.output)
+            );
+        }
+};
+P32.slip.connect();
 
 P32.EffectUnit = function (unitNumber) {
     var that = this;
