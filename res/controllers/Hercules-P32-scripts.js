@@ -126,9 +126,11 @@ var Control = function (signals, group, inOptions, outOptions) {
         this.connections[0] = engine.connectControl(this.group, this.outCo, this.output);
     };
     this.disconnect = function () {
-        this.connections.forEach(function (connection) {
-            connection.disconnect();
-        });
+        if (this.connections[0] !== undefined) {
+            this.connections.forEach(function (connection) {
+                connection.disconnect();
+            });
+        }
     };
     this.trigger = function() { engine.trigger(this.group, this.outCo); };
     this.send = function (value) { midi.sendShortMsg(this.midi.status, this.midi.note, value); };
@@ -841,52 +843,61 @@ P32.EffectUnit = function (unitNumber) {
         this.group,
         'group_[Headphone]_enable',
         true,
-        P32.padColors.red);
+        P32.padColors.red,
+        P32.padColors.blue);
+
     this.toggleHeadphonesShifted = new ToggleButton(
         [0x90 + unitNumber + P32.shiftOffset, 0x34],
         this.group,
         'group_[Headphone]_enable',
         true,
-        P32.padColors.red);
+        P32.padColors.red,
+        P32.padColors.blue);
 
     this.toggleMaster = new ToggleButton(
         [0x90 + unitNumber, 0x35],
         this.group,
         'group_[Master]_enable',
         true,
-        P32.padColors.red);
+        P32.padColors.red,
+        P32.padColors.blue);
     this.toggleMasterShifted = new ToggleButton(
         [0x90 + unitNumber + P32.shiftOffset, 0x35],
         this.group,
         'group_[Master]_enable',
         true,
-        P32.padColors.red);
+        P32.padColors.red,
+        P32.padColors.blue);
 
     this.toggleMicrophone = new ToggleButton(
         [0x90 + unitNumber, 0x36],
         this.group,
         'group_[Microphone]_enable',
         true,
-        P32.padColors.red);
+        P32.padColors.red,
+        P32.padColors.blue);
     this.toggleMicrophoneShifted = new ToggleButton(
         [0x90 + unitNumber + P32.shiftOffset, 0x36],
         this.group,
         'group_[Microphone]_enable',
         true,
-        P32.padColors.red);
+        P32.padColors.red,
+        P32.padColors.blue);
 
     this.toggleAuxiliary = new ToggleButton(
         [0x90 + unitNumber, 0x37],
         this.group,
         'group_[Auxiliary1]_enable',
         true,
-        P32.padColors.red);
+        P32.padColors.red,
+        P32.padColors.blue);
     this.toggleAuxiliaryShifted = new ToggleButton(
         [0x90 + unitNumber + P32.shiftOffset, 0x37],
         this.group,
         'group_[Auxiliary1]_enable',
         true,
-        P32.padColors.red);
+        P32.padColors.red,
+        P32.padColors.blue);
 };
 
 P32.Deck = function (deckNumbers, channel) {
