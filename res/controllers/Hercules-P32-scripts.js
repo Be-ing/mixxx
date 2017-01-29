@@ -1084,6 +1084,14 @@ P32.Deck = function (deckNumbers, channel) {
         }
     };
 
+    this.loopEncoderManualLoopPress = function (channel, control, value, status, group) {
+        if (value) {
+            engine.setValue(this.currentDeck, 'loop_in', 1);
+        } else {
+            engine.setValue(this.currentDeck, 'loop_out', 1);
+        }
+    };
+
     this.tempoEncoder = function (channel, control, value, status, group) {
         var direction = (value > 64) ? -1 : 1;
         engine.setValue(that.currentDeck, 'rate', engine.getValue(that.currentDeck, 'rate') + (0.01 * direction));
