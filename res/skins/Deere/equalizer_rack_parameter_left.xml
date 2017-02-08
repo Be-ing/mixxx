@@ -72,8 +72,8 @@
 
           <WidgetGroup>
             <ObjectName>EQKnobNoLabel</ObjectName>
-            <MinimumSize>40,34</MinimumSize>
-            <MaximumSize>40,41</MaximumSize>
+            <MinimumSize>40,30</MinimumSize>
+            <MaximumSize>40,35</MaximumSize>
             <Layout>vertical</Layout>
             <Children>
               <Template src="skin:knob.xml">
@@ -86,8 +86,8 @@
 
           <WidgetGroup>
             <ObjectName>EQKnobWithLabel</ObjectName>
-            <MinimumSize>40,42</MinimumSize>
-            <MaximumSize>40,45</MaximumSize>
+            <MinimumSize>40,36</MinimumSize>
+            <MaximumSize>40,39</MaximumSize>
             <Layout>vertical</Layout>
             <Children>
               <Template src="skin:knob.xml">
