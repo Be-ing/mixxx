@@ -57,6 +57,10 @@
         </Children>
       </WidgetGroup>
 
+      <Template src="skin:spacer_hx.xml">
+        <SetVariable name="width">5</SetVariable>
+      </Template>
+
       <Template src="skin:knob_with_label.xml"/>
 
     </Children>

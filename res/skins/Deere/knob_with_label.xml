@@ -10,8 +10,8 @@
     <Children>
 
       <WidgetGroup>
-        <MinimumSize>40,34</MinimumSize>
-        <MaximumSize>40,41</MaximumSize>
+        <MinimumSize>30,30</MinimumSize>
+        <MaximumSize>30,36</MaximumSize>
         <Layout>vertical</Layout>
         <Children>
           <Template src="skin:knob.xml"/>
@@ -19,13 +19,13 @@
       </WidgetGroup>
 
       <WidgetGroup>
-        <MinimumSize>40,42</MinimumSize>
-        <MaximumSize>40,45</MaximumSize>
+        <MinimumSize>30,37</MinimumSize>
+        <MaximumSize>30,40</MaximumSize>
         <Layout>vertical</Layout>
         <Children>
           <Template src="skin:knob.xml"/>
           <Label>
-            <Size>40f,10f</Size>
+            <Size>30f,10f</Size>
             <ObjectName>KnobLabel</ObjectName>
             <Text><Variable name="label"/></Text>
           </Label>

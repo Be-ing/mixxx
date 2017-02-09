@@ -41,16 +41,22 @@
 
       <!--In 2 deck mode, show the gain knob above the channel level meters.-->
       <WidgetGroup>
-        <Layout>vertical</Layout>
+        <Layout>horizontal</Layout>
         <Size>40f,-1</Size>
         <MinimumSize>40,34</MinimumSize>
         <MaximumSize>40,46</MaximumSize>
         <Children>
+          <Template src="skin:spacer_hx.xml">
+            <SetVariable name="width">5</SetVariable>
+          </Template>
           <Template src="skin:knob_with_label.xml">
             <SetVariable name="TooltipId">pregain</SetVariable>
             <SetVariable name="control">pregain</SetVariable>
             <SetVariable name="color">red</SetVariable>
             <SetVariable name="label">Gain</SetVariable>
+          </Template>
+          <Template src="skin:spacer_hx.xml">
+            <SetVariable name="width">5</SetVariable>
           </Template>
         </Children>
         <Connection>

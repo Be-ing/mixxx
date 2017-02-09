@@ -18,14 +18,18 @@
     <Layout>horizontal</Layout>
     <Children>
 
+      <Template src="skin:spacer_hx.xml">
+        <SetVariable name="width">5</SetVariable>
+      </Template>
+
       <SizeAwareStack>
-        <Size>40f,-1me</Size>
+        <Size>30f,-1me</Size>
         <Children>
 
           <WidgetGroup>
             <ObjectName>EQKnobNoLabel</ObjectName>
-            <MinimumSize>40,34</MinimumSize>
-            <MaximumSize>40,41</MaximumSize>
+            <MinimumSize>30,30</MinimumSize>
+            <MaximumSize>30,36</MaximumSize>
             <Layout>vertical</Layout>
             <Children>
               <Template src="skin:knob.xml">
@@ -38,8 +42,8 @@
 
           <WidgetGroup>
             <ObjectName>EQKnobWithLabel</ObjectName>
-            <MinimumSize>40,42</MinimumSize>
-            <MaximumSize>40,45</MaximumSize>
+            <MinimumSize>30,37</MinimumSize>
+            <MaximumSize>30,40</MaximumSize>
             <Layout>vertical</Layout>
             <Children>
               <Template src="skin:knob.xml">
@@ -48,7 +52,7 @@
                 <SetVariable name="color"><Variable name="color"/></SetVariable>
               </Template>
               <EffectParameterName>
-                <Size>40f,10f</Size>
+                <Size>30f,10f</Size>
                 <ObjectName>KnobLabel</ObjectName>
                 <EffectRackGroup><Variable name="EqualizerRackGroup"/></EffectRackGroup>
                 <EffectUnitGroup><Variable name="EqualizerEffectUnitGroup"/></EffectUnitGroup>
@@ -60,6 +64,10 @@
 
         </Children>
       </SizeAwareStack>
+
+      <Template src="skin:spacer_hx.xml">
+        <SetVariable name="width">5</SetVariable>
+      </Template>
 
       <!--Wrap the EffectPushButton in a vertical WidgetGroup with spacers to ensure it stays in the
       correct position when the knobs get further apart and closer together.-->
