@@ -10,9 +10,9 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    id="svg2"
-   height="34"
+   height="30"
    width="40"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.48.4 r9939"
    sodipodi:docname="knob_bg.svg">
   <sodipodi:namedview
      pagecolor="#ffffff"
@@ -24,14 +24,14 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="1366"
-     inkscape:window-height="702"
+     inkscape:window-height="746"
      id="namedview17"
      showgrid="false"
-     inkscape:zoom="13.882353"
-     inkscape:cx="-9.5352971"
-     inkscape:cy="14.406656"
+     inkscape:zoom="9.8163059"
+     inkscape:cx="7.0510767"
+     inkscape:cy="6.2465058"
      inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg2" />
   <defs
@@ -94,15 +94,25 @@
     </rdf:RDF>
   </metadata>
   <ellipse
-     style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:0;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;marker:none;enable-background:accumulate"
+     style="opacity:0;color:#000000;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
      id="path4202"
      cx="-13.524048"
      cy="0.45841381"
      rx="2.5876327"
-     ry="2.4899862" />
+     ry="2.4899862"
+     sodipodi:cx="-13.524048"
+     sodipodi:cy="0.45841381"
+     sodipodi:rx="2.5876327"
+     sodipodi:ry="2.4899862"
+     transform="translate(0,-4)" />
   <path
-     inkscape:connector-curvature="0"
-     style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#d2d2d2;stroke-width:1.85;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker:none;enable-background:accumulate"
-     id="path4204"
-     d="m 9.12797,29.49882 a 15.375,15.375 0 0 1 0,-21.74353 15.375,15.375 0 0 1 21.74354,0 15.375,15.375 0 0 1 0,21.74353" />
+     sodipodi:type="arc"
+     style="fill:#d2d2d2;fill-opacity:1;fill-rule:nonzero;stroke:none"
+     id="path3197"
+     sodipodi:cx="9.346693"
+     sodipodi:cy="27.504152"
+     sodipodi:rx="1.0696489"
+     sodipodi:ry="1.0696489"
+     d="m 10.416342,27.504152 a 1.0696489,1.0696489 0 1 1 -2.1392978,0 1.0696489,1.0696489 0 1 1 2.1392978,0 z"
+     transform="translate(10.653307,-1.6737343)" />
 </svg>

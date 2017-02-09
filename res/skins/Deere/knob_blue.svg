@@ -10,9 +10,9 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    id="svg2"
-   height="34"
+   height="30"
    width="40"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.48.4 r9939"
    sodipodi:docname="knob_blue.svg">
   <sodipodi:namedview
      pagecolor="#ffffff"
@@ -24,14 +24,14 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="1366"
-     inkscape:window-height="702"
+     inkscape:window-height="746"
      id="namedview17"
      showgrid="false"
-     inkscape:zoom="9.8163059"
-     inkscape:cx="-25.211427"
-     inkscape:cy="13.493928"
+     inkscape:zoom="13.882353"
+     inkscape:cx="11.477539"
+     inkscape:cy="18.003266"
      inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg2" />
   <defs
@@ -94,27 +94,33 @@
     </rdf:RDF>
   </metadata>
   <ellipse
-     style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:0;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;marker:none;enable-background:accumulate"
+     style="opacity:0;color:#000000;fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
      id="path4202"
      cx="-13.524048"
      cy="0.45841381"
      rx="2.5876327"
-     ry="2.4899862" />
+     ry="2.4899862"
+     sodipodi:cx="-13.524048"
+     sodipodi:cy="0.45841381"
+     sodipodi:rx="2.5876327"
+     sodipodi:ry="2.4899862"
+     transform="translate(0,-4)" />
   <g
      id="g4718"
-     transform="translate(-24.11028,5.718031)">
+     transform="translate(-24.11028,3.647906)">
     <path
        inkscape:connector-curvature="0"
        id="path4256"
        d="M 40.26067,2.0182965 A 11.539,11.539 0 0 0 32.571217,12.883531 11.539,11.539 0 0 0 44.11028,24.422594 11.539,11.539 0 0 0 55.649342,12.883531 11.539,11.539 0 0 0 47.959889,2.0202496 l 0,10.8632814 c 0,2.091956 -1.757654,3.84961 -3.849609,3.84961 -2.091955,0 -3.84961,-1.757654 -3.84961,-3.84961 l 0,-10.8652345 z"
-       style="opacity:1;fill:#d2d2d2;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       style="fill:#d2d2d2;fill-opacity:1;stroke:none" />
     <rect
-       style="opacity:1;fill:#489aff;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#489aff;fill-opacity:1;stroke:none"
        id="rect4263"
        width="3"
        height="14"
        x="42.610279"
        y="0.38396862"
-       ry="1.5" />
+       ry="1.5"
+       rx="1.5" />
   </g>
 </svg>
