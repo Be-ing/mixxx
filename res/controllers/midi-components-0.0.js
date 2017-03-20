@@ -161,6 +161,12 @@
         onlyOnPress: true,
         on: 127,
         off: 0,
+        // Time in milliseconds to distinguish a short press from a long press
+        // In the provided Components, only EffectUnit.effectFocusButton uses
+        // this, but it is recommended to refer to it (as this.longPressTimeout)
+        // in any custom Buttons that act differently with short and long presses
+        // to keep the timeouts uniform.
+        longPressTimeout: 275,
         isPress: function (channel, control, value, status) {
             return value > 0;
         },
@@ -580,7 +586,7 @@
             outKey: "focused_effect",
             connect: function () {
                 if (this.firstValueReceived) {
-                    engine.softTakeover(this.group, this.inKey, true);
+
                 }
                 this.connections[0] = engine.connectControl(eu.group, "focused_effect",
                                                             this.onFocusChange);
@@ -604,7 +610,6 @@
                                   '_Effect' + value + ']';
                     this.inKey = 'parameter' + this.number;
                     engine.softTakeoverIgnoreNextValue(this.group, this.inKey);
-
                 }
             },
         });
@@ -650,6 +655,12 @@
         this.enableButtons = new ComponentContainer();
         for (var n = 1; n <= 3; n++) {
             this.knobs[n] = new this.EffectUnitKnob(n);
+            var effect = '[EffectRack1_EffectUnit' + this.currentUnitNumber +
+                         '_Effect' + n + ']';
+            engine.softTakeover(effect, 'meta', true);
+            engine.softTakeover(effect, 'parameter1', true);
+            engine.softTakeover(effect, 'parameter2', true);
+            engine.softTakeover(effect, 'parameter3', true);
             this.enableButtons[n] = new this.EffectEnableButton(n);
         }
 
@@ -671,7 +682,7 @@
                     var showParameters = engine.getValue(this.group, "show_parameters");
                     if (this.isPress(channel, control, value, status)) {
                         if (showParameters) {
-                            this.longPressTimer = engine.beginTimer(275,
+                            this.longPressTimer = engine.beginTimer(this.longPressTimeout,
                                                       this.startEffectFocusChooseMode,
                                                       true);
                         } else {
@@ -681,7 +692,7 @@
                                 engine.setValue(this.group, "show_parameters", 1);
                                 engine.setValue(this.group, "show_focus", 1);
                             }
-                            this.longPressTimer = engine.beginTimer(275,
+                            this.longPressTimer = engine.beginTimer(this.longPressTimeout,
                                                       this.startEffectFocusChooseMode,
                                                       true);
                             this.pressedWhenParametersHidden = true;
