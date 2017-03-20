@@ -284,44 +284,29 @@
                         engine.setValue(this.group, 'play', 0);
                     } else {
                         engine.setValue(this.group, 'eject', 1);
-                        engine.beginTimer(225, function () {
-                          engine.setValue(this.group, 'eject', 0);
-                        }, true);
                     }
                 }
             };
         },
         output: function (value, group, control) {
             if (engine.getValue(this.group, 'track_loaded') === 1) {
-                if (this.loaded === undefined) {
+                if (this.playing === undefined) {
                     this.send(this.on);
                 } else {
                     if (engine.getValue(this.group, 'play') === 1) {
-                        if (this.looping !== undefined &&
-                            engine.getValue(this.group, 'repeat') === 1) {
-                            this.send(this.looping);
-                        } else {
-                            this.send(this.playing);
-                        }
+                        this.send(this.on);
                     } else {
-                        this.send(this.loaded);
+                        this.send(this.playing);
                     }
                 }
             } else {
-                if (this.empty === undefined) {
-                    this.send(this.off);
-                } else {
-                    this.send(this.empty);
-                }
+                this.send(this.off);
             }
         },
         connect: function() {
             this.connections[0] = engine.connectControl(this.group, 'track_loaded', this.output);
             if (this.playing !== undefined) {
                 this.connections[1] = engine.connectControl(this.group, 'play', this.output);
-            }
-            if (this.looping !== undefined) {
-                this.connections[2] = engine.connectControl(this.group, 'repeat', this.output);
             }
         },
         outKey: null, // hack to get Component constructor to call connect()
@@ -502,7 +487,7 @@
         }
     });
 
-    EffectUnit = function (unitNumbers) {
+    EffectUnit = function (unitNumbers, allowFocusWhenParametersHidden) {
         var eu = this;
 
         if (unitNumbers !== undefined) {
@@ -519,6 +504,16 @@
             }
         } else {
             print('ERROR! new EffectUnit() called without specifying any unit numbers!');
+        }
+
+        if (allowFocusWhenParametersHidden === undefined) {
+            allowFocusWhenParametersHidden = false;
+            if (engine.getValue(this.group, "show_parameters") === 0) {
+                engine.setValue(this.group, "focused_effect", 0);
+                engine.setValue(this.group, "show_focus", 0);
+            }
+        } else if (allowFocusWhenParametersHidden === true) {
+            engine.setValue(this.group, "show_focus", 1);
         }
 
         this.setCurrentUnit = function (newNumber) {
@@ -680,10 +675,12 @@
                                                       this.startEffectFocusChooseMode,
                                                       true);
                         } else {
-                            engine.setValue(this.group, "show_parameters", 1);
-                            engine.setValue(this.group, "show_focus", 1);
-                            engine.setValue(this.group, "focused_effect",
-                                            this.previouslyFocusedEffect);
+                            if (!allowFocusWhenParametersHidden) {
+                                engine.setValue(this.group, "focused_effect",
+                                                this.previouslyFocusedEffect);
+                                engine.setValue(this.group, "show_parameters", 1);
+                                engine.setValue(this.group, "show_focus", 1);
+                            }
                             this.longPressTimer = engine.beginTimer(275,
                                                       this.startEffectFocusChooseMode,
                                                       true);
@@ -699,11 +696,15 @@
                             });
                             this.focusChooseMode = false;
                         } else if (showParameters && !this.pressedWhenParametersHidden) {
-                            this.previouslyFocusedEffect = engine.getValue(this.group,
-                                                                          "focused_effect");
-                            engine.setValue(this.group, "focused_effect", 0);
-                            engine.setValue(this.group, "show_focus", 0);
+                            if (!allowFocusWhenParametersHidden) {
+                                this.previouslyFocusedEffect = engine.getValue(this.group,
+                                                                              "focused_effect");
+                                engine.setValue(this.group, "focused_effect", 0);
+                                engine.setValue(this.group, "show_focus", 0);
+                            }
                             engine.setValue(this.group, "show_parameters", 0);
+                        } else if (!showParameters && allowFocusWhenParametersHidden) {
+                            engine.setValue(this.group, "show_parameters", 1);
                         }
                         this.pressedWhenParametersHidden = false;
                     }
