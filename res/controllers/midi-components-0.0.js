@@ -247,8 +247,7 @@
 
     var HotcueButton = function (options) {
         if (options.number === undefined) {
-            print('ERROR: No hotcue number specified for new HotcueButton.');
-            return;
+            print('WARNING: No hotcue number specified for new HotcueButton.');
         }
         this.number = options.number;
         this.outKey = 'hotcue_' + this.number + '_enabled';
@@ -266,8 +265,7 @@
 
     var SamplerButton = function (options) {
         if (options.number === undefined) {
-            print('ERROR: No sampler number specified for new SamplerButton.');
-            return;
+            print('WARNING: No sampler number specified for new SamplerButton.');
         }
         this.number = options.number;
         this.group = '[Sampler' + this.number + ']';
@@ -458,7 +456,6 @@
             }
         } else {
             print('ERROR! new Deck() called without specifying any deck numbers');
-            return;
         }
     };
     Deck.prototype = new ComponentContainer({
@@ -484,7 +481,6 @@
             });
         },
         toggle: function () {
-            // cycle through deckNumbers array
             var index = this.deckNumbers.indexOf(parseInt(
                 script.channelRegEx.exec(this.currentDeck)[1]
             ));
@@ -514,28 +510,26 @@
             }
         } else {
             print('ERROR! new EffectUnit() called without specifying any unit numbers!');
-            return;
         }
 
-        if (allowFocusWhenParametersHidden === true) {
-            engine.setValue(this.group, "show_focus", 1);
-        } else {
+        if (allowFocusWhenParametersHidden === undefined) {
+            allowFocusWhenParametersHidden = false;
             if (engine.getValue(this.group, "show_parameters") === 0) {
                 engine.setValue(this.group, "focused_effect", 0);
                 engine.setValue(this.group, "show_focus", 0);
             }
+        } else if (allowFocusWhenParametersHidden === true) {
+            engine.setValue(this.group, "show_focus", 1);
         }
 
         this.setCurrentUnit = function (newNumber) {
             this.currentUnitNumber = newNumber;
             this.group = '[EffectRack1_EffectUnit' + newNumber + ']';
             this.reconnectComponents(function (component) {
-                // update [EffectRack1_EffectUnitX] groups
                 var unitMatch = component.group.match(script.effectUnitRegEx);
                 if (unitMatch !== null) {
                     component.group = eu.group;
                 } else {
-                    // update [EffectRack1_EffectUnitX_EffectY] groups
                     var effectMatch = component.group.match(script.individualEffectRegEx);
                     if (effectMatch !== null) {
                         component.group = '[EffectRack1_EffectUnit' +
@@ -547,7 +541,6 @@
         };
 
         this.toggle = function () {
-            // cycle through unitNumbers array
             var index = this.unitNumbers.indexOf(this.currentUnitNumber);
             if (index === (this.unitNumbers.length - 1)) {
                 index = 0;
@@ -570,11 +563,7 @@
                 // for soft takeover
                 this.disconnect();
                 this.connect();
-                // engine.softTakeoverIgnoreNextValue is called
-                // in the knobs' onFocusChange function
-                eu.knobs.forEachComponent(function (knob) {
-                    knob.trigger();
-                });
+                eu.knobs.reconnectComponents();
             },
             outConnect: false,
         });
@@ -594,16 +583,11 @@
         };
         this.EffectUnitKnob.prototype = new Pot({
             group: this.group,
-            input: function (channel, control, value, status, group) {
-                this.inSetParameter(this.inValueScale(value));
-                // Unlike the Pot prototype, do not enable soft takeover here
-                // because soft takeover needs to be enabled for all the
-                // metaknobs and parameters 1-3 of all 3 effects. Instead, enabling
-                // soft takeover is handled below in the loop that calls the
-                // EffectUnitKnob constructor.
-            },
             outKey: "focused_effect",
             connect: function () {
+                if (this.firstValueReceived) {
+
+                }
                 this.connections[0] = engine.connectControl(eu.group, "focused_effect",
                                                             this.onFocusChange);
             },
@@ -641,8 +625,8 @@
                 this.inKey = 'enabled';
                 this.outKey = 'enabled';
                 this.input = Button.prototype.input;
-                this.connect = Button.prototype.connect;
                 this.output = Button.prototype.output;
+                this.connect = Button.prototype.connect;
             },
             startEffectFocusChooseMode: function () {
                 this.input = function (channel, control, value, status, group) {
@@ -683,12 +667,12 @@
         this.effectFocusButton = new Button({
             group: this.group,
             longPressed: false,
-            focusChooseModeActive: false,
+            focusChooseMode: false,
             longPressTimer: 0,
             pressedWhenParametersHidden: false,
             previouslyFocusedEffect: 0,
             startEffectFocusChooseMode: function () {
-                this.focusChooseModeActive = true;
+                this.focusChooseMode = true;
                 eu.enableButtons.reconnectComponents(function (button) {
                     button.startEffectFocusChooseMode();
                 });
@@ -697,40 +681,41 @@
                 this.input = function (channel, control, value, status, group) {
                     var showParameters = engine.getValue(this.group, "show_parameters");
                     if (this.isPress(channel, control, value, status)) {
-                        this.longPressTimer = engine.beginTimer(this.longPressTimeout,
+                        if (showParameters) {
+                            this.longPressTimer = engine.beginTimer(this.longPressTimeout,
                                                       this.startEffectFocusChooseMode,
                                                       true);
-                        if (!showParameters) {
+                        } else {
                             if (!allowFocusWhenParametersHidden) {
                                 engine.setValue(this.group, "focused_effect",
                                                 this.previouslyFocusedEffect);
                                 engine.setValue(this.group, "show_parameters", 1);
                                 engine.setValue(this.group, "show_focus", 1);
                             }
+                            this.longPressTimer = engine.beginTimer(this.longPressTimeout,
+                                                      this.startEffectFocusChooseMode,
+                                                      true);
                             this.pressedWhenParametersHidden = true;
                         }
                     } else {
                         if (this.longPressTimer) {
                             engine.stopTimer(this.longPressTimer);
                         }
-
-                        if (this.focusChooseModeActive) {
+                        if (this.focusChooseMode) {
                             eu.enableButtons.reconnectComponents(function (button) {
                                 button.stopEffectFocusChooseMode();
                             });
-                            this.focusChooseModeActive = false;
-                        } else {
-                            if (!showParameters && allowFocusWhenParametersHidden) {
-                                  engine.setValue(this.group, "show_parameters", 1);
-                            } else if (showParameters && !this.pressedWhenParametersHidden) {
-                                  if (!allowFocusWhenParametersHidden) {
-                                      this.previouslyFocusedEffect = engine.getValue(this.group,
-                                                                         "focused_effect");
-                                      engine.setValue(this.group, "focused_effect", 0);
-                                      engine.setValue(this.group, "show_focus", 0);
-                                  }
-                                  engine.setValue(this.group, "show_parameters", 0);
+                            this.focusChooseMode = false;
+                        } else if (showParameters && !this.pressedWhenParametersHidden) {
+                            if (!allowFocusWhenParametersHidden) {
+                                this.previouslyFocusedEffect = engine.getValue(this.group,
+                                                                              "focused_effect");
+                                engine.setValue(this.group, "focused_effect", 0);
+                                engine.setValue(this.group, "show_focus", 0);
                             }
+                            engine.setValue(this.group, "show_parameters", 0);
+                        } else if (!showParameters && allowFocusWhenParametersHidden) {
+                            engine.setValue(this.group, "show_parameters", 1);
                         }
                         this.pressedWhenParametersHidden = false;
                     }
