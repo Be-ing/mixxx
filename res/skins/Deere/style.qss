@@ -1071,7 +1071,7 @@ WNumberRate {
 
 #DeckMixer1_ColumnCondensed, #DeckMixer2_ColumnCondensed, #DeckMixer3_ColumnCondensed,
 #DeckMixer4_ColumnCondensed {
-  padding: 5;
+  padding: 0px 5px 0px 5px;
   qproperty-layoutAlignment: 'AlignHCenter';
 }
 
