@@ -91,7 +91,6 @@ P32.recordButton = new components.Button({
     midi: [0x90, 0x02],
     group: '[Recording]',
     inKey: 'toggle_recording',
-    onlyOnPress: false,
     outKey: 'status',
     sendShifted: false,
 });
@@ -177,6 +176,7 @@ P32.Deck = function (deckNumbers, channel) {
     this.pfl = new components.Button({
         midi: [0x90 + channel, 0x10],
         sendShifted: false,
+        type: components.Button.prototype.types.toggle,
         unshift: function () {
             this.group = theDeck.currentDeck;
             this.inKey = 'pfl';
@@ -230,14 +230,12 @@ P32.Deck = function (deckNumbers, channel) {
     this.loopIn = new components.Button({
         midi: [0x90 + channel, 0x50],
         key: 'loop_in',
-        onlyOnPress: false,
         on: P32.padColors.red,
         off: P32.padColors.purple,
     });
     this.loopOut = new components.Button({
         midi: [0x90 + channel, 0x51],
         key: 'loop_out',
-        onlyOnPress: false,
         on: P32.padColors.red,
         off: P32.padColors.purple,
     });
@@ -247,9 +245,8 @@ P32.Deck = function (deckNumbers, channel) {
             this.inKey = 'reloop_toggle';
         },
         shift: function () {
-            this.inKey = 'reloop_cue';
+            this.inKey = 'reloop_andstop';
         },
-        onlyOnPress: false,
         on: P32.padColors.red,
         off: P32.padColors.blue,
         outKey: 'loop_enabled',
@@ -258,27 +255,25 @@ P32.Deck = function (deckNumbers, channel) {
     this.tempSlow = new components.Button({
         midi: [0x90 + channel, 0x44],
         key: 'rate_temp_down',
-        onlyOnPress: false,
         on: P32.padColors.red,
         off: P32.padColors.purple,
     });
     this.tempFast = new components.Button({
         midi: [0x90 + channel, 0x45],
         key: 'rate_temp_up',
-        onlyOnPress: false,
         on: P32.padColors.red,
         off: P32.padColors.purple,
     });
     this.alignBeats = new components.Button({
         midi: [0x90 + channel, 0x46],
         key: 'beats_translate_curpos',
-        onlyOnPress: false,
         on: P32.padColors.red,
         off: P32.padColors.blue,
     });
     this.quantize = new components.Button({
         midi: [0x90 + channel, 0x4B],
         key: 'quantize',
+        type: components.Button.prototype.types.toggle,
         on: P32.padColors.red,
         off: P32.padColors.blue,
     });
@@ -370,20 +365,28 @@ P32.Deck = function (deckNumbers, channel) {
 
     this.loopMoveEncoder = function (channel, control, value, status, group) {
         if (value > 64) { // left turn
-            engine.setValue(this.currentDeck, 'loop_move_backward', 1);
+            engine.setValue(this.currentDeck, 'beatjump_1_backward', 1);
             engine.beginTimer(200, function () {
-                engine.setValue(this.currentDeck, 'loop_move_backward', 0);
+                engine.setValue(this.currentDeck, 'beatjump_1_backward', 0);
             }, true);
         } else { // right turn
-            engine.setValue(this.currentDeck, 'loop_move_forward', 1);
+            engine.setValue(this.currentDeck, 'beatjump_1_forward', 1);
             engine.beginTimer(200, function () {
-                engine.setValue(this.currentDeck, 'loop_move_forward', 0);
+                engine.setValue(this.currentDeck, 'beatjump_1_forward', 0);
             }, true);
         }
     };
 
     this.loopToggleEncoderPress = function (channel, control, value, status, group) {
-        engine.setValue(this.currentDeck, 'beatloop_toggle', value / 127);
+        if (value > 0) {
+            if (engine.getValue(this.currentDeck, 'loop_enabled') === 1) {
+                engine.setValue(this.currentDeck, 'reloop_toggle', 1);
+                engine.setValue(this.currentDeck, 'reloop_toggle', 0);
+            } else {
+                engine.setValue(this.currentDeck, 'beatloop_activate', 1);
+                engine.setValue(this.currentDeck, 'beatloop_activate', 0);
+            }
+        }
     };
 
     this.loopEncoderShiftPress = function (channel, control, value, status, group) {
