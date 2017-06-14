@@ -166,8 +166,7 @@
         types: {
             push: 0,
             toggle: 1,
-            trigger: 2,
-            powerWindow: 3,
+            powerWindow: 2,
         },
         type: 0,
         on: 127,
@@ -187,25 +186,19 @@
                 if (this.isPress(channel, control, value, status)) {
                     this.inToggle();
                 }
-            } else if (this.type === this.types.trigger) {
-                if (this.isPress(channel, control, value, status)) {
-                    this.inSetValue(1);
-                }
             } else if (this.type === this.types.powerWindow) {
                 if (this.isPress(channel, control, value, status)) {
-                    script.toggleControl(this.group, this.inKey);
+                    this.inToggle();
                     this.longPressTimer = engine.beginTimer(this.longPressTimeout, function () {
                         this.isLongPressed = true;
                     }, true);
                 } else {
                     if (this.isLongPressed) {
-                        script.toggleControl(this.group, this.inKey);
-                    }
-                    if (this.longPressTimer) {
+                        this.inToggle();
+                    } else {
                         engine.stopTimer(this.longPressTimer);
-                        this.isLongPressed = false;
-                        this.longPressTimer = 0;
                     }
+                    this.isLongPressed = false;
                 }
             }
         },
