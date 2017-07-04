@@ -43,6 +43,12 @@ P32.init = function () {
     components.Component.prototype.shiftChannel = true;
     components.Button.prototype.sendShifted = true;
 
+    components.SyncButton.prototype.input = components.Button.prototype.input;
+    components.SyncButton.prototype.type = components.Button.prototype.types.toggle;
+    components.SyncButton.prototype.unshift = function () {
+        this.inKey = 'sync_enabled';
+    };
+
     if (engine.getValue('[Master]', 'num_samplers') < 32) {
         engine.setValue('[Master]', 'num_samplers', 32);
     }
