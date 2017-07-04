@@ -2,7 +2,7 @@
 // The labels on the encoders are mirrored, but the rest of the controller
 // is asymmetrical. If this is confusing for you to use, set this to "false" to swap the
 // mapping of the encoders on the right deck so the whole controller is asymmetrical.
-var mirroredEncoders = true;
+var mirroredEncoders = false;
 // Set this to "false" to be able to set the loop and beatjump sizes above 64 beats
 // to values that cannot be shown on the controller's LED display.
 var clampLoopAndBeatJumpSize = true;
