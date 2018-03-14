@@ -1337,14 +1337,9 @@ WStarRating {
   padding-left: 5px;
 }
 
-#EffectUnitEffectsNoParameters {
-  qproperty-layoutSpacing: 30;
-}
-
 #EffectUnitEffects {
   padding: 2px;
   qproperty-layoutAlignment: 'AlignLeft | AlignTop';
-  qproperty-layoutSpacing: 2;
 }
 
 #EffectUnitParameters {
@@ -1354,7 +1349,7 @@ WStarRating {
 }
 
 #EffectUnitControls {
-  padding: 2px;
+  padding: 8px;
   qproperty-layoutAlignment: 'AlignRight | AlignTop';
   qproperty-layoutSpacing: 2;
 }
