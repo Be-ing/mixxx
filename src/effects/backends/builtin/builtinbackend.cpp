@@ -23,6 +23,7 @@
 #include "effects/backends/builtin/loudnesscontoureffect.h"
 #include "effects/backends/builtin/metronomeeffect.h"
 #include "effects/backends/builtin/tremoloeffect.h"
+#include "effects/backends/builtin/beatgrindeffect.cpp"
 
 BuiltInBackend::BuiltInBackend() {
     // Keep this list in a reasonable order
@@ -51,6 +52,7 @@ BuiltInBackend::BuiltInBackend() {
     registerEffect<PhaserEffect>();
     registerEffect<MetronomeEffect>();
     registerEffect<TremoloEffect>();
+    registerEffect<BeatGrindEffect>();
 }
 
 std::unique_ptr<EffectProcessor> BuiltInBackend::createProcessor(
