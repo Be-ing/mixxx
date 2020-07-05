@@ -1,19 +1,21 @@
 
+#include "effects/backends/builtin/builtinbackend.h"
+
 #include <QtDebug>
 
-#include "effects/backends/builtin/builtinbackend.h"
-#include "effects/backends/builtin/flangereffect.h"
-#include "effects/backends/builtin/bitcrushereffect.h"
 #include "effects/backends/builtin/balanceeffect.h"
-#include "effects/backends/builtin/linkwitzriley8eqeffect.h"
-#include "effects/backends/builtin/bessel8lvmixeqeffect.h"
 #include "effects/backends/builtin/bessel4lvmixeqeffect.h"
-#include "effects/backends/builtin/threebandbiquadeqeffect.h"
+#include "effects/backends/builtin/bessel8lvmixeqeffect.h"
 #include "effects/backends/builtin/biquadfullkilleqeffect.h"
-#include "effects/backends/builtin/graphiceqeffect.h"
-#include "effects/backends/builtin/parametriceqeffect.h"
+#include "effects/backends/builtin/bitcrushereffect.h"
 #include "effects/backends/builtin/filtereffect.h"
+#include "effects/backends/builtin/flangereffect.h"
+#include "effects/backends/builtin/graphiceqeffect.h"
+#include "effects/backends/builtin/linkwitzriley8eqeffect.h"
 #include "effects/backends/builtin/moogladder4filtereffect.h"
+#include "effects/backends/builtin/noiseeffect.h"
+#include "effects/backends/builtin/parametriceqeffect.h"
+#include "effects/backends/builtin/threebandbiquadeqeffect.h"
 #ifndef __MACAPPSTORE__
 #include "effects/backends/builtin/reverbeffect.h"
 #endif
@@ -40,6 +42,7 @@ BuiltInBackend::BuiltInBackend() {
     registerEffect<FilterEffect>();
     registerEffect<MoogLadder4FilterEffect>();
     registerEffect<BitCrusherEffect>();
+    registerEffect<NoiseEffect>();
     registerEffect<BalanceEffect>();
     // Fancy effects
     registerEffect<FlangerEffect>();
