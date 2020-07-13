@@ -45,8 +45,8 @@ class MidiUtils {
                               unsigned char opCode,
                               mixxx::Duration timestamp = mixxx::Duration::fromMillis(0));
     static QString formatSysexMessage(const QString& controllerName,
-                              const QByteArray& data,
-                              mixxx::Duration timestamp = mixxx::Duration::fromMillis(0));
+            const QVector<uint8_t>& data,
+            mixxx::Duration timestamp = mixxx::Duration::fromMillis(0));
 };
 
 

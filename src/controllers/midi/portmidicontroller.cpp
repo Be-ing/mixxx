@@ -15,7 +15,10 @@ PortMidiController::PortMidiController(const PmDeviceInfo* inputDeviceInfo,
         const PmDeviceInfo* outputDeviceInfo,
         int inputDeviceIndex,
         int outputDeviceIndex)
-        : MidiController(), m_cReceiveMsg_index(0), m_bInSysex(false) {
+        : MidiController(),
+          m_cReceiveMsg(MIXXX_SYSEX_BUFFER_LEN),
+          m_cReceiveMsg_index(0),
+          m_bInSysex(false) {
     for (unsigned int k = 0; k < MIXXX_PORTMIDI_BUFFER_LEN; ++k) {
         // Can be shortened to `m_midiBuffer[k] = {}` with C++11.
         m_midiBuffer[k].message = 0;
@@ -178,7 +181,7 @@ bool PortMidiController::poll() {
             }
 
             // Collect bytes from PmMessage
-            unsigned char data = 0;
+            uint8_t data = 0;
             for (int shift = 0; shift < 32 && (data != MIDI_EOX); shift += 8) {
                 // TODO(rryan): This prevents buffer overflow if the sysex is
                 // larger than 1024 bytes. I don't want to radically change
@@ -192,9 +195,7 @@ bool PortMidiController::poll() {
             // End System Exclusive message if the EOX byte was received
             if (data == MIDI_EOX) {
                 m_bInSysex = false;
-                const char* buffer = reinterpret_cast<const char*>(m_cReceiveMsg);
-                receive(QByteArray::fromRawData(buffer, m_cReceiveMsg_index),
-                        timestamp);
+                receive(m_cReceiveMsg, timestamp);
                 m_cReceiveMsg_index = 0;
             }
         }
@@ -243,12 +244,13 @@ void PortMidiController::send(QByteArray data) {
     }
 
     PmError err = m_pOutputDevice->writeSysEx((unsigned char*)data.constData());
+    // TODO: re-enable debugging messages when refactoring to use QVector<uint8_t> instead of QByteArray
     if (err == pmNoError) {
-        controllerDebug(MidiUtils::formatSysexMessage(getName(), data));
+        //controllerDebug(MidiUtils::formatSysexMessage(getName(), data));
     } else {
         // Use two qWarnings() to ensure line break works on all operating systems
-        qWarning() << "Error sending SysEx message:"
-                   << MidiUtils::formatSysexMessage(getName(), data);
+        qWarning() << "Error sending SysEx message:";
+        //<< MidiUtils::formatSysexMessage(getName(), data);
         qWarning() << "PortMidi error:" << Pm_GetErrorText(err);
     }
 }

@@ -121,8 +121,9 @@ QString MidiUtils::formatMidiMessage(const QString& controllerName,
 }
 
 // static
-QString MidiUtils::formatSysexMessage(const QString& controllerName, const QByteArray& data,
-                                           mixxx::Duration timestamp) {
+QString MidiUtils::formatSysexMessage(const QString& controllerName,
+        const QVector<uint8_t>& data,
+        mixxx::Duration timestamp) {
     QString msg2;
     if (timestamp == mixxx::Duration::fromMillis(0)) {
       msg2 = "outgoing:";

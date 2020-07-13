@@ -50,9 +50,9 @@ void ControllerScriptModuleEngine::shutdown() {
 }
 
 void ControllerScriptModuleEngine::handleInput(
-        QByteArray data, mixxx::Duration timestamp) {
+        const QVector<uint8_t>& data, mixxx::Duration timestamp) {
     QJSValueList args;
-    args << byteArrayToScriptValue(data);
+    args << m_pJSEngine->toScriptValue(data);
     args << timestamp.toDoubleMillis();
     executeFunction(m_handleInputFunction, args);
 }

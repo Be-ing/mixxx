@@ -40,7 +40,7 @@ void DeviceChannelListener::Process(const hss1394::uint8 *pBuffer, hss1394::uint
                 if (i + 2 < uBufferSize) {
                     note = pBuffer[i+1];
                     velocity = pBuffer[i+2];
-                    emit incomingData(status, note, velocity, timestamp);
+                    emit receiveShortMessage(status, note, velocity, timestamp);
                 } else {
                     qWarning() << "Buffer underflow in DeviceChannelListener::Process()";
                 }
@@ -48,8 +48,11 @@ void DeviceChannelListener::Process(const hss1394::uint8 *pBuffer, hss1394::uint
                 break;
             default:
                 // Handle platter messages and any others that are not 3 bytes
-                QByteArray outArray((char*)pBuffer,uBufferSize);
-                emit incomingData(outArray, timestamp);
+                QVector<uint8_t> vector(uBufferSize);
+                for (uint i = 0; i < uBufferSize; i++) {
+                    vector.append(pBuffer[i]);
+                }
+                emit receiveSysex(vector, timestamp);
                 i = uBufferSize;
                 break;
         }
@@ -110,10 +113,12 @@ int Hss1394Controller::open() {
     }
 
     m_pChannelListener = new DeviceChannelListener(this, getName());
-    connect(m_pChannelListener, SIGNAL(incomingData(QByteArray, mixxx::Duration)),
-            this, SLOT(receive(QByteArray, mixxx::Duration)));
     connect(m_pChannelListener,
-            &DeviceChannelListener::incomingData,
+            &DeviceChannelListener::receiveSysex,
+            this,
+            &Hss1394Controller::receive);
+    connect(m_pChannelListener,
+            &DeviceChannelListener::receiveShortMessage,
             this,
             &Hss1394Controller::receiveShortMessage);
 
@@ -150,10 +155,14 @@ int Hss1394Controller::close() {
         return -1;
     }
 
-    disconnect(m_pChannelListener, SIGNAL(incomingData(QByteArray, mixxx::Duration)),
-               this, SLOT(receive(QByteArray, mixxx::Duration)));
-    disconnect(m_pChannelListener, SIGNAL(incomingData(unsigned char, unsigned char, unsigned char, mixxx::Duration)),
-               this, SLOT(receive(unsigned char, unsigned char, unsigned char, mixxx::Duration)));
+    disconnect(m_pChannelListener,
+            &DeviceChannelListener::receiveSysex,
+            this,
+            &Hss1394Controller::receive);
+    disconnect(m_pChannelListener,
+            &DeviceChannelListener::receiveShortMessage,
+            this,
+            &Hss1394Controller::receiveShortMessage);
 
     stopEngine();
     MidiController::close();
@@ -193,7 +202,8 @@ void Hss1394Controller::send(QByteArray data) {
     int bytesSent = m_pChannel->SendChannelBytes(
         (unsigned char*)data.constData(), data.size());
 
-    controllerDebug(MidiUtils::formatSysexMessage(getName(), data));
+    // TODO: re-enable debug output when switching to QVector<uint8_t> instead of QByteArray
+    //controllerDebug(MidiUtils::formatSysexMessage(getName(), data));
     //if (bytesSent != length) {
     //    qDebug()<<"ERROR: Sent" << bytesSent << "of" << length << "bytes (SysEx)";
     //    //m_pChannel->Flush();

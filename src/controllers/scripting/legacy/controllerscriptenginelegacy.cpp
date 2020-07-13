@@ -131,7 +131,7 @@ void ControllerScriptEngineLegacy::shutdown() {
     ControllerScriptEngineBase::shutdown();
 }
 
-bool ControllerScriptEngineLegacy::handleIncomingData(const QByteArray& data) {
+bool ControllerScriptEngineLegacy::handleIncomingData(const QVector<uint8_t>& data) {
     // This function is called from outside the controller engine, so we can't
     // use VERIFY_OR_DEBUG_ASSERT here
     if (!m_pJSEngine) {
@@ -139,7 +139,7 @@ bool ControllerScriptEngineLegacy::handleIncomingData(const QByteArray& data) {
     }
 
     QJSValueList args;
-    args << byteArrayToScriptValue(data);
+    args << m_pJSEngine->toScriptValue(data);
     args << QJSValue(data.size());
 
     for (const QJSValue& function : m_incomingDataFunctions) {

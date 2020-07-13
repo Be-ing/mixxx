@@ -98,7 +98,7 @@ class PortMidiController : public MidiController {
     PmEvent m_midiBuffer[MIXXX_PORTMIDI_BUFFER_LEN];
 
     // Storage for SysEx messages
-    unsigned char m_cReceiveMsg[MIXXX_SYSEX_BUFFER_LEN];
+    QVector<uint8_t> m_cReceiveMsg;
     int m_cReceiveMsg_index;
     bool m_bInSysex;
 

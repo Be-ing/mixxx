@@ -74,7 +74,7 @@ class MidiController : public Controller {
             unsigned char value,
             mixxx::Duration timestamp);
     // For receiving System Exclusive messages
-    void receive(const QByteArray data, mixxx::Duration timestamp) override;
+    void receive(const QVector<uint8_t>& data, mixxx::Duration timestamp) override;
     int close() override;
 
   private slots:
@@ -97,8 +97,8 @@ class MidiController : public Controller {
                              unsigned char value,
                              mixxx::Duration timestamp);
     void processInputMapping(const MidiInputMapping& mapping,
-                             const QByteArray& data,
-                             mixxx::Duration timestamp);
+            const QVector<uint8_t>& data,
+            mixxx::Duration timestamp);
 
     double computeValue(MidiOptions options, double _prevmidivalue, double _newmidivalue);
     void createOutputHandlers();

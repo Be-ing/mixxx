@@ -14,7 +14,7 @@ class ControllerScriptModuleEngine : public ControllerScriptEngineBase {
         m_moduleFileInfo = moduleFileInfo;
     }
 
-    void handleInput(QByteArray data, mixxx::Duration timestamp);
+    void handleInput(const QVector<uint8_t>& data, mixxx::Duration timestamp);
 
   private:
     void shutdown() override;

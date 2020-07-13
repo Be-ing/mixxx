@@ -470,7 +470,7 @@ double MidiController::computeValue(
     return newmidivalue;
 }
 
-void MidiController::receive(QByteArray data, mixxx::Duration timestamp) {
+void MidiController::receive(const QVector<uint8_t>& data, mixxx::Duration timestamp) {
     controllerDebug(MidiUtils::formatSysexMessage(getName(), data, timestamp));
 
     MidiKey mappingKey(data.at(0), 0xFF);
@@ -498,8 +498,8 @@ void MidiController::receive(QByteArray data, mixxx::Duration timestamp) {
 }
 
 void MidiController::processInputMapping(const MidiInputMapping& mapping,
-                                         const QByteArray& data,
-                                         mixxx::Duration timestamp) {
+        const QVector<uint8_t>& data,
+        mixxx::Duration timestamp) {
     // Custom script handler
     if (mapping.options.script) {
         ControllerScriptEngineLegacy* pEngine = getScriptEngine();

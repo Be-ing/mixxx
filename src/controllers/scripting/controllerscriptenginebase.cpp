@@ -57,9 +57,6 @@ bool ControllerScriptEngineBase::initialize() {
                 "midi", m_pJSEngine->newQObject(controllerProxy));
     }
 
-    m_byteArrayToScriptValueJSFunction = m_pJSEngine->evaluate(
-            "(function(arg1) { return new Uint8Array(arg1) })");
-
     return true;
 }
 
@@ -233,18 +230,4 @@ void ControllerScriptEngineBase::throwJSError(const QString& message) {
 #else
     m_pJSEngine->throwError(message);
 #endif
-}
-
-QJSValue ControllerScriptEngineBase::byteArrayToScriptValue(
-        const QByteArray& byteArray) {
-    // The QJSEngine converts the QByteArray to an ArrayBuffer object.
-    QJSValue arrayBuffer = m_pJSEngine->toScriptValue(byteArray);
-    // Convert the ArrayBuffer to a Uint8 typed array so scripts can access its bytes
-    // with the [] operator.
-    QJSValue result =
-            m_byteArrayToScriptValueJSFunction.call(QJSValueList{arrayBuffer});
-    if (result.isError()) {
-        showScriptExceptionDialog(result);
-    }
-    return result;
 }

@@ -23,7 +23,7 @@ class ControllerScriptEngineLegacy : public ControllerScriptEngineBase {
 
     bool initialize() override;
 
-    bool handleIncomingData(const QByteArray& data);
+    bool handleIncomingData(const QVector<uint8_t>& data);
 
     /// Wrap a string of JS code in an anonymous function. This allows any JS
     /// string that evaluates to a function to be used in MIDI mapping XML files
