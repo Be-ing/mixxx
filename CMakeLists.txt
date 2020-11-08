@@ -2469,5 +2469,10 @@ if(APPLE)
           endfunction()
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${MIXXX_INSTALL_PREFIX}\" \"${QT_PLUGINS}\" \"${LIB_DIRS}\")
+        if(DEFINED \${CPACK_BUNDLE_APPLE_CERT_APP})
+          execute_process(
+            COMMAND codesign --deep --force --sign \"\${CPACK_BUNDLE_APPLE_CERT_APP}\" \"\${CMAKE_INSTALL_PREFIX}/${MIXXX_INSTALL_PREFIX}\"
+          )
+        endif()
     ")
 endif()
