@@ -1061,7 +1061,7 @@ if (APPLE)
     set(MACOS_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION}")
     set(MACOS_BUNDLE_SHORTVERSION "${CMAKE_PROJECT_VERSION}")
     set(MACOS_BUNDLE_MINOSVERSION "10.11.0")
-    
+
     set_target_properties(mixxx PROPERTIES
         MACOSX_BUNDLE true
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/macos_bundle.plist.in"
@@ -2470,9 +2470,12 @@ if(APPLE)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${MIXXX_INSTALL_PREFIX}\" \"${QT_PLUGINS}\" \"${LIB_DIRS}\")
         if(DEFINED \${CPACK_BUNDLE_APPLE_CERT_APP})
+          message(STATUS \"Signing bundle\")
           execute_process(
             COMMAND codesign --deep --force --sign \"\${CPACK_BUNDLE_APPLE_CERT_APP}\" \"\${CMAKE_INSTALL_PREFIX}/${MIXXX_INSTALL_PREFIX}\"
           )
+        else()
+          message(STATUS \"Not signing bundle. Specify -DCPACK_BUNDLE_APPLE_CERT_APP to sign\")
         endif()
     ")
 endif()
