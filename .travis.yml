@@ -86,7 +86,7 @@ jobs:
       # Virtual X (Xvfb) is needed for analyzer waveform tests
       addons:
         homebrew:
-          update: true
+          update: false
           packages:
             - ccache
       env: >-
