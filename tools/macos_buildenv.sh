@@ -55,7 +55,7 @@ case "$COMMAND" in
         if [ ! -d "${BUILDENV_PATH}" ]; then
             if [ "$1" != "--profile" ]; then
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading it..."
-                curl "https://downloads.mixxx.org/builds/buildserver/2.3.x-unix/${BUILDENV_NAME}.tar.gz" -o "${BUILDENV_PATH}.tar.gz"
+                curl "https://beasintheverb.me/${BUILDENV_NAME}.tar.gz" -o "${BUILDENV_PATH}.tar.gz"
                 OBSERVED_SHA256=$(shasum -a 256 "${BUILDENV_PATH}.tar.gz"|cut -f 1 -d' ')
                 if [[ $OBSERVED_SHA256 == $BUILDENV_SHA256 ]]; then
                     echo "Download matched expected SHA256 sum $BUILDENV_SHA256"
@@ -76,6 +76,9 @@ case "$COMMAND" in
             fi
         elif [ "$1" != "--profile" ]; then
             echo "Build environment found: ${BUILDENV_PATH}"
+            # TODO: verify download using sha256sum?
+            tar xf "${BUILDENV_PATH}.tar.gz" -C "${BUILDENV_BASEPATH}"
+            rm "${BUILDENV_PATH}.tar.gz"
         fi
 
         export CMAKE_PREFIX_PATH="${BUILDENV_PATH}"
