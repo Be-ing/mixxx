@@ -13,7 +13,7 @@ EffectsBackendManager::EffectsBackendManager() {
             ConfigKey("[Master]", "num_effectsavailable"));
     m_pNumEffectsAvailable->setReadOnly();
 
-    addBackend(EffectsBackendPointer(new BuiltInBackend()));
+    addBackend(EffectsBackendPointer(BuiltInBackend::get()));
 #ifdef __LILV__
     addBackend(EffectsBackendPointer(new LV2Backend()));
 #endif

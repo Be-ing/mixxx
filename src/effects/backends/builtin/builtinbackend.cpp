@@ -1,59 +1,13 @@
-
 #include "effects/backends/builtin/builtinbackend.h"
 
 #include <QtDebug>
 
-#include "effects/backends/builtin/balanceeffect.h"
-#include "effects/backends/builtin/bessel4lvmixeqeffect.h"
-#include "effects/backends/builtin/bessel8lvmixeqeffect.h"
-#include "effects/backends/builtin/biquadfullkilleqeffect.h"
-#include "effects/backends/builtin/bitcrushereffect.h"
-#include "effects/backends/builtin/filtereffect.h"
-#include "effects/backends/builtin/flangereffect.h"
-#include "effects/backends/builtin/graphiceqeffect.h"
-#include "effects/backends/builtin/linkwitzriley8eqeffect.h"
-#include "effects/backends/builtin/moogladder4filtereffect.h"
-#include "effects/backends/builtin/parametriceqeffect.h"
-#include "effects/backends/builtin/threebandbiquadeqeffect.h"
-#ifndef __MACAPPSTORE__
-#include "effects/backends/builtin/reverbeffect.h"
-#endif
-#include "effects/backends/builtin/autopaneffect.h"
-#include "effects/backends/builtin/echoeffect.h"
-#include "effects/backends/builtin/loudnesscontoureffect.h"
-#include "effects/backends/builtin/metronomeeffect.h"
-#include "effects/backends/builtin/phasereffect.h"
-#include "effects/backends/builtin/tremoloeffect.h"
-#include "effects/backends/builtin/whitenoiseeffect.h"
+#include "effects/backends/effectmanifest.h"
+#include "effects/backends/effectprocessor.h"
 
-BuiltInBackend::BuiltInBackend() {
-    // Keep this list in a reasonable order
-    // Mixing EQs
-    registerEffect<Bessel4LVMixEQEffect>();
-    registerEffect<Bessel8LVMixEQEffect>();
-    registerEffect<LinkwitzRiley8EQEffect>();
-    registerEffect<ThreeBandBiquadEQEffect>();
-    registerEffect<BiquadFullKillEQEffect>();
-    // Compensations EQs
-    registerEffect<GraphicEQEffect>();
-    registerEffect<ParametricEQEffect>();
-    registerEffect<LoudnessContourEffect>();
-    // Fading Effects
-    registerEffect<FilterEffect>();
-    registerEffect<MoogLadder4FilterEffect>();
-    registerEffect<BitCrusherEffect>();
-    registerEffect<WhiteNoiseEffect>();
-    registerEffect<BalanceEffect>();
-    // Fancy effects
-    registerEffect<FlangerEffect>();
-    registerEffect<EchoEffect>();
-    registerEffect<AutoPanEffect>();
-#ifndef __MACAPPSTORE__
-    registerEffect<ReverbEffect>();
-#endif
-    registerEffect<PhaserEffect>();
-    registerEffect<MetronomeEffect>();
-    registerEffect<TremoloEffect>();
+BuiltInBackend* BuiltInBackend::get() {
+    static BuiltInBackend instance;
+    return &instance;
 }
 
 std::unique_ptr<EffectProcessor> BuiltInBackend::createProcessor(
@@ -70,7 +24,7 @@ BuiltInBackend::~BuiltInBackend() {
     m_effectIds.clear();
 }
 
-void BuiltInBackend::registerEffectInner(
+void BuiltInBackend::registerEffect(
         const QString& id,
         EffectManifestPointer pManifest,
         EffectProcessorInstantiator instantiator) {
@@ -82,6 +36,9 @@ void BuiltInBackend::registerEffectInner(
 
     m_registeredEffects[id] = RegisteredEffect{pManifest, instantiator};
     m_effectIds.append(id);
+
+    qDebug() << "================================================" << this
+             << "registered effect" << id << pManifest << instantiator;
 }
 
 const QList<QString> BuiltInBackend::getEffectIds() const {

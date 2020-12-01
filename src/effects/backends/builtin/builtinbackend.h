@@ -6,7 +6,7 @@
 /// Refer to EffectsBackend for documentation
 class BuiltInBackend : public EffectsBackend {
   public:
-    BuiltInBackend();
+    static BuiltInBackend* get();
     virtual ~BuiltInBackend();
 
     EffectBackendType getType() const {
@@ -20,33 +20,40 @@ class BuiltInBackend : public EffectsBackend {
             const EffectManifestPointer pManifest) const;
     bool canInstantiateEffect(const QString& effectId) const;
 
+    typedef std::unique_ptr<EffectProcessor> (*EffectProcessorInstantiator)();
+
+    void registerEffect(const QString& id,
+            EffectManifestPointer pManifest,
+            EffectProcessorInstantiator instantiator);
+
   private:
+    BuiltInBackend() = default;
+
     QString debugString() const {
         return "BuiltInBackend";
     }
-
-    typedef std::unique_ptr<EffectProcessor> (*EffectProcessorInstantiator)();
 
     struct RegisteredEffect {
         EffectManifestPointer pManifest;
         EffectProcessorInstantiator instantiator;
     };
 
-    void registerEffectInner(const QString& id,
-            EffectManifestPointer pManifest,
-            EffectProcessorInstantiator instantiator);
+    QMap<QString, RegisteredEffect> m_registeredEffects;
+    QList<QString> m_effectIds;
+};
 
-    template<typename EffectProcessorImpl>
-    void registerEffect() {
-        registerEffectInner(
+// hack so BuiltInBackend::registerEffect can be called from
+// outside of any class or function
+template<typename EffectProcessorImpl>
+class BuiltInEffectRegistrator {
+  public:
+    BuiltInEffectRegistrator() {
+        BuiltInBackend::get()->registerEffect(
                 EffectProcessorImpl::getId(),
                 EffectProcessorImpl::getManifest(),
                 []() {
                     return static_cast<std::unique_ptr<EffectProcessor>>(
                             std::make_unique<EffectProcessorImpl>());
                 });
-    };
-
-    QMap<QString, RegisteredEffect> m_registeredEffects;
-    QList<QString> m_effectIds;
+    }
 };
