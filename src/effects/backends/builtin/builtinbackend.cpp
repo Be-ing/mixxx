@@ -24,7 +24,7 @@ BuiltInBackend::~BuiltInBackend() {
     m_effectIds.clear();
 }
 
-void BuiltInBackend::registerEffect(
+void BuiltInBackend::registerEffectInner(
         const QString& id,
         EffectManifestPointer pManifest,
         EffectProcessorInstantiator instantiator) {

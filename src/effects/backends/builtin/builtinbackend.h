@@ -22,9 +22,17 @@ class BuiltInBackend : public EffectsBackend {
 
     typedef std::unique_ptr<EffectProcessor> (*EffectProcessorInstantiator)();
 
-    void registerEffect(const QString& id,
-            EffectManifestPointer pManifest,
-            EffectProcessorInstantiator instantiator);
+    template<typename EffectProcessorImpl>
+    static bool registerEffect() {
+        BuiltInBackend::get()->registerEffectInner(
+                EffectProcessorImpl::getId(),
+                EffectProcessorImpl::getManifest(),
+                []() {
+                    return static_cast<std::unique_ptr<EffectProcessor>>(
+                            std::make_unique<EffectProcessorImpl>());
+                });
+        return true;
+    };
 
   private:
     BuiltInBackend() = default;
@@ -38,22 +46,10 @@ class BuiltInBackend : public EffectsBackend {
         EffectProcessorInstantiator instantiator;
     };
 
+    void registerEffectInner(const QString& id,
+            EffectManifestPointer pManifest,
+            EffectProcessorInstantiator instantiator);
+
     QMap<QString, RegisteredEffect> m_registeredEffects;
     QList<QString> m_effectIds;
-};
-
-// hack so BuiltInBackend::registerEffect can be called from
-// outside of any class or function
-template<typename EffectProcessorImpl>
-class BuiltInEffectRegistrator {
-  public:
-    BuiltInEffectRegistrator() {
-        BuiltInBackend::get()->registerEffect(
-                EffectProcessorImpl::getId(),
-                EffectProcessorImpl::getManifest(),
-                []() {
-                    return static_cast<std::unique_ptr<EffectProcessor>>(
-                            std::make_unique<EffectProcessorImpl>());
-                });
-    }
 };

@@ -53,5 +53,5 @@ class BitCrusherEffect : public EffectProcessorImpl<BitCrusherGroupState> {
 };
 
 namespace {
-BuiltInEffectRegistrator<BitCrusherEffect> BitCrusherRegistrator;
+bool whydoesthisneedtoexist = BuiltInBackend::registerEffect<BitCrusherEffect>();
 }
