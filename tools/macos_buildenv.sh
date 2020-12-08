@@ -37,25 +37,12 @@ case "$COMMAND" in
         ;;
 
     setup)
-        if [[ "$BUILDENV_NAME" =~ .*macosminimum([0-9]*\.[0-9]*).* ]]; then
-            # bash and zsh have different ways of getting the matched string
-            # zsh's BASH_REMATCH option is not actually compatible with bash
-            if [ -n "${BASH_REMATCH}" ]; then
-                export MACOSX_DEPLOYMENT_TARGET="${BASH_REMATCH[1]}"
-            elif [ -n "$match" ]; then
-                export MACOSX_DEPLOYMENT_TARGET="${match[1]}"
-            fi
-        else
-            echo "Build environment did not match expected pattern. Check ${MIXXX_ROOT}/cmake/macos_build_environment file." >&2
-            return
-        fi
-
         BUILDENV_PATH="${BUILDENV_BASEPATH}/${BUILDENV_NAME}"
         mkdir -p "${BUILDENV_BASEPATH}"
         if [ ! -d "${BUILDENV_PATH}" ]; then
             if [ "$1" != "--profile" ]; then
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading it..."
-                curl "https://downloads.mixxx.org/builds/buildserver/2.3.x-unix/${BUILDENV_NAME}.tar.gz" -o "${BUILDENV_PATH}.tar.gz"
+                curl "https://downloads.mixxx.org/builds/buildserver/2.3.x-macosx/${BUILDENV_NAME}.tar.gz" -o "${BUILDENV_PATH}.tar.gz"
                 OBSERVED_SHA256=$(shasum -a 256 "${BUILDENV_PATH}.tar.gz"|cut -f 1 -d' ')
                 if [[ $OBSERVED_SHA256 == $BUILDENV_SHA256 ]]; then
                     echo "Download matched expected SHA256 sum $BUILDENV_SHA256"
@@ -100,9 +87,10 @@ case "$COMMAND" in
             rm "${SDKROOT}.tar.xz"
         fi
 
+        export MACOSX_DEPLOYMENT_TARGET=10.12
         export CC="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
         export CXX="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++"
-        export CMAKE_PREFIX_PATH="${BUILDENV_PATH}"
+        export CMAKE_PREFIX_PATH="${SDKROOT}:${BUILDENV_PATH}"
         export Qt5_DIR="$(find "${BUILDENV_PATH}" -type d -path "*/cmake/Qt5")"
         export QT_QPA_PLATFORM_PLUGIN_PATH="$(find "${BUILDENV_PATH}" -type d -path "*/plugins")"
         export PATH="${BUILDENV_PATH}/bin:${PATH}"

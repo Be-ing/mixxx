@@ -168,6 +168,10 @@ jobs:
       env:
         BUILDENV_BASEPATH: ${{ matrix.buildenv_basepath }}
 
+    - name: "[macOS] install ccache"
+      if: runner.os == 'macOS'
+      run: brew install ccache
+
     - name: "Set compiler cache size limit"
       # Set size to 2 GiB
       run: ${{ matrix.compiler_cache }}  -M 2097152
