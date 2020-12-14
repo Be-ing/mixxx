@@ -1,9 +1,11 @@
-#include <QtDebug>
+#include "controllers/delegates/controldelegate.h"
+
 #include <QLineEdit>
 #include <QStringList>
+#include <QtDebug>
 
-#include "controllers/delegates/controldelegate.h"
 #include "controllers/midi/midimessage.h"
+#include "moc_controldelegate.cpp"
 
 ControlDelegate::ControlDelegate(QObject* pParent)
         : QStyledItemDelegate(pParent),
@@ -48,7 +50,7 @@ QString ControlDelegate::displayText(const QVariant& value,
     }
 
     if (m_bIsIndexScript) {
-        return tr("Script: %1(%2)").arg(key.item, key.group);
+        return tr("%1 %2").arg(key.group, key.item);
     }
 
     QString description = m_pPicker->descriptionForConfigKey(key);
@@ -63,7 +65,7 @@ void ControlDelegate::setEditorData(QWidget* editor,
                                     const QModelIndex& index) const {
     ConfigKey key = index.data(Qt::EditRole).value<ConfigKey>();
 
-    QLineEdit* pLineEdit = dynamic_cast<QLineEdit*>(editor);
+    QLineEdit* pLineEdit = qobject_cast<QLineEdit*>(editor);
     if (pLineEdit == NULL) {
         return;
     }

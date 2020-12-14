@@ -1,5 +1,4 @@
-#ifndef MIXXX_SOUNDSOURCEM4A_H
-#define MIXXX_SOUNDSOURCEM4A_H
+#pragma once
 
 #include "sources/soundsource.h"
 #include "sources/soundsourceprovider.h"
@@ -35,7 +34,7 @@ class SoundSourceM4A : public SoundSource {
 
   protected:
     ReadableSampleFrames readSampleFramesClamped(
-            WritableSampleFrames sampleFrames) override;
+            const WritableSampleFrames& sampleFrames) override;
 
   private:
     OpenResult tryOpen(
@@ -43,39 +42,49 @@ class SoundSourceM4A : public SoundSource {
             const OpenParams& params) override;
 
     bool openDecoder();
-    void closeDecoder();
     bool reopenDecoder();
+    bool replaceDecoder(
+            faad2::DecoderHandle hNewDecoder);
+    void closeDecoder();
 
     bool isValidSampleBlockId(MP4SampleId sampleBlockId) const;
 
     void restartDecoding(MP4SampleId sampleBlockId);
+
+    faad2::LibLoader* const m_pFaad;
 
     MP4FileHandle m_hFile;
     MP4TrackId m_trackId;
     MP4Duration m_framesPerSampleBlock;
     MP4SampleId m_maxSampleBlockId;
 
+    u_int8_t* m_pMP4ESConfigBuffer{};
+    u_int32_t m_sizeofMP4ESConfigBuffer;
+
     typedef std::vector<u_int8_t> InputBuffer;
     InputBuffer m_inputBuffer;
-    SINT m_inputBufferLength;
-    SINT m_inputBufferOffset;
+    InputBuffer::size_type m_inputBufferLength;
+    InputBuffer::size_type m_inputBufferOffset;
 
     OpenParams m_openParams;
 
-    LibFaadLoader::Handle m_hDecoder;
+    faad2::DecoderHandle m_hDecoder;
     SINT m_numberOfPrefetchSampleBlocks;
     MP4SampleId m_curSampleBlockId;
 
     ReadAheadSampleBuffer m_sampleBuffer;
 
     SINT m_curFrameIndex;
-
-    LibFaadLoader* m_pFaad;
 };
 
 class SoundSourceProviderM4A : public SoundSourceProvider {
   public:
-    QString getName() const override;
+    static const QString kDisplayName;
+    static const QStringList kSupportedFileExtensions;
+
+    QString getDisplayName() const override {
+        return kDisplayName;
+    }
 
     QStringList getSupportedFileExtensions() const override;
 
@@ -83,5 +92,3 @@ class SoundSourceProviderM4A : public SoundSourceProvider {
 };
 
 } // namespace mixxx
-
-#endif // MIXXX_SOUNDSOURCEM4A_H

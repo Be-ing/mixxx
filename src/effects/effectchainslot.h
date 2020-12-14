@@ -1,5 +1,4 @@
-#ifndef EFFECTCHAINSLOT_H
-#define EFFECTCHAINSLOT_H
+#pragma once
 
 #include <QObject>
 #include <QMap>
@@ -34,7 +33,7 @@ class EffectChainSlot : public QObject {
     EffectChainPointer getEffectChain() const;
     EffectChainPointer getOrCreateEffectChain(EffectsManager* pEffectsManager);
 
-    void registerInputChannel(const ChannelHandleAndGroup& handle_group);
+    void registerInputChannel(const ChannelHandleAndGroup& handleGroup);
 
     double getSuperParameter() const;
     void setSuperParameter(double value, bool force = false);
@@ -94,7 +93,7 @@ class EffectChainSlot : public QObject {
 
 
   private slots:
-    void slotChainEffectChanged(unsigned int effectSlotNumber, bool shouldEmit=true);
+    void slotChainEffectChanged(unsigned int effectSlotNumber, bool shouldEmit);
     void slotChainNameChanged(const QString& name);
     void slotChainEnabledChanged(bool enabled);
     void slotChainMixChanged(double mix);
@@ -108,7 +107,7 @@ class EffectChainSlot : public QObject {
     void slotControlClear(double v);
     void slotControlChainEnabled(double v);
     void slotControlChainMix(double v);
-    void slotControlChainSuperParameter(double v, bool force = false);
+    void slotControlChainSuperParameter(double v, bool force);
     void slotControlChainMixMode(double v);
     void slotControlChainSelector(double v);
     void slotControlChainNextPreset(double v);
@@ -153,15 +152,14 @@ class EffectChainSlot : public QObject {
 
     struct ChannelInfo {
         // Takes ownership of pEnabled.
-        ChannelInfo(const ChannelHandleAndGroup& handle_group, ControlObject* pEnabled)
-                : handle_group(handle_group),
+        ChannelInfo(const ChannelHandleAndGroup& handleGroup, ControlObject* pEnabled)
+                : handleGroup(handleGroup),
                   pEnabled(pEnabled) {
-
         }
         ~ChannelInfo() {
             delete pEnabled;
         }
-        ChannelHandleAndGroup handle_group;
+        ChannelHandleAndGroup handleGroup;
         ControlObject* pEnabled;
     };
     QMap<QString, ChannelInfo*> m_channelInfoByName;
@@ -170,6 +168,3 @@ class EffectChainSlot : public QObject {
 
     DISALLOW_COPY_AND_ASSIGN(EffectChainSlot);
 };
-
-
-#endif /* EFFECTCHAINSLOT_H */

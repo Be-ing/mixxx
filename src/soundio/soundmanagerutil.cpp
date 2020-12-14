@@ -1,18 +1,3 @@
-/**
- * @file soundmanagerutil.cpp
- * @author Bill Good <bkgood at gmail dot com>
- * @date 20100611
- */
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
 #include "soundio/soundmanagerutil.h"
 
 #include "engine/channels/enginechannel.h"
@@ -119,6 +104,9 @@ QString AudioPath::getStringFromType(AudioPathType type) {
         // handle this -- bkgood
         return QStringLiteral("Invalid");
     case MASTER:
+        // This was renamed to "Main" in the GUI, but keep "Master" here to avoid
+        // making users reconfigure the output when upgrading.
+        // https://mixxx.org/news/2020-06-29-black-lives-matter/
         return QStringLiteral("Master");
     case BOOTH:
         return QStringLiteral("Booth");
@@ -151,7 +139,7 @@ QString AudioPath::getTrStringFromType(AudioPathType type, unsigned char index) 
         // handle this -- bkgood
         return QObject::tr("Invalid");
     case MASTER:
-        return QObject::tr("Master");
+        return QObject::tr("Main");
     case BOOTH:
         return QObject::tr("Booth");
     case HEADPHONES:
@@ -274,10 +262,6 @@ AudioOutput::AudioOutput(AudioPathType type,
     } else {
         m_index = 0;
     }
-}
-
-AudioOutput::~AudioOutput() {
-
 }
 
 /**

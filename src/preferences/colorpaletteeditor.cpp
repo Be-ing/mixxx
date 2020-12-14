@@ -10,6 +10,7 @@
 #include <QStandardItemModel>
 #include <QTableView>
 
+#include "moc_colorpaletteeditor.cpp"
 #include "preferences/colorpalettesettings.h"
 #include "util/color/predefinedcolorpalettes.h"
 
@@ -78,10 +79,9 @@ ColorPaletteEditor::ColorPaletteEditor(QWidget* parent, bool showHotcueNumbers)
     setContentsMargins(0, 0, 0, 0);
 
     // Set up model
-    m_pModel->setColumnCount(3);
+    m_pModel->setColumnCount(2);
     m_pModel->setHeaderData(0, Qt::Horizontal, tr("Color"), Qt::DisplayRole);
     m_pModel->setHeaderData(1, Qt::Horizontal, tr("Assign to Hotcue Number"), Qt::DisplayRole);
-    m_pModel->setHeaderData(2, Qt::Horizontal, QString(), Qt::DisplayRole);
     connect(m_pModel,
             &ColorPaletteEditorModel::dirtyChanged,
             this,
@@ -102,7 +102,7 @@ ColorPaletteEditor::ColorPaletteEditor(QWidget* parent, bool showHotcueNumbers)
 
     m_pTableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     m_pTableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    m_pTableView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    m_pTableView->horizontalHeader()->setStretchLastSection(true);
 
     if (!showHotcueNumbers) {
         m_pTableView->hideColumn(1);

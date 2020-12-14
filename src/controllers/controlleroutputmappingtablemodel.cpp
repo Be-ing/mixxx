@@ -1,11 +1,12 @@
 #include "controllers/controlleroutputmappingtablemodel.h"
 
-#include "controllers/midi/midimessage.h"
-#include "controllers/midi/midiutils.h"
 #include "controllers/delegates/controldelegate.h"
+#include "controllers/delegates/midibytedelegate.h"
 #include "controllers/delegates/midichanneldelegate.h"
 #include "controllers/delegates/midiopcodedelegate.h"
-#include "controllers/delegates/midibytedelegate.h"
+#include "controllers/midi/midimessage.h"
+#include "controllers/midi/midiutils.h"
+#include "moc_controlleroutputmappingtablemodel.cpp"
 
 ControllerOutputMappingTableModel::ControllerOutputMappingTableModel(QObject* pParent)
         : ControllerMappingTableModel(pParent) {
@@ -19,7 +20,7 @@ void ControllerOutputMappingTableModel::apply() {
         // Clear existing output mappings and insert all the output mappings in
         // the table into the preset.
         QMultiHash<ConfigKey, MidiOutputMapping> mappings;
-        for (const MidiOutputMapping& mapping : m_midiOutputMappings) {
+        for (const MidiOutputMapping& mapping : qAsConst(m_midiOutputMappings)) {
             // There can be multiple output mappings for the same output
             // control, so we need to use a QMultiHash here.
             mappings.insert(mapping.controlKey, mapping);

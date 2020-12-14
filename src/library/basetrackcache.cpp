@@ -1,15 +1,14 @@
-// basetrackcache.cpp
-// Created 7/3/2011 by RJ Ryan (rryan@mit.edu)
-
 #include "library/basetrackcache.h"
 
-#include "library/trackcollection.h"
-#include "library/searchqueryparser.h"
 #include "library/queryutil.h"
-#include "track/keyutils.h"
+#include "library/searchqueryparser.h"
+#include "library/trackcollection.h"
+#include "moc_basetrackcache.cpp"
 #include "track/globaltrackcache.h"
-#include "util/performancetimer.h"
+#include "track/keyutils.h"
+#include "track/track.h"
 #include "util/compatibility.h"
+#include "util/performancetimer.h"
 
 namespace {
 
@@ -74,7 +73,7 @@ QString BaseTrackCache::columnSortForFieldIndex(int index) const {
     return m_columnCache.columnSortForFieldIndex(index);
 }
 
-void BaseTrackCache::slotTracksAddedOrChanged(QSet<TrackId> trackIds) {
+void BaseTrackCache::slotTracksAddedOrChanged(const QSet<TrackId>& trackIds) {
     if (sDebug) {
         qDebug() << this << "slotTracksAddedOrChanged" << trackIds.size();
     }
@@ -88,7 +87,7 @@ void BaseTrackCache::slotScanTrackAdded(TrackPointer pTrack) {
     updateTrackInIndex(pTrack);
 }
 
-void BaseTrackCache::slotTracksRemoved(QSet<TrackId> trackIds) {
+void BaseTrackCache::slotTracksRemoved(const QSet<TrackId>& trackIds) {
     if (sDebug) {
         qDebug() << this << "slotTracksRemoved" << trackIds.size();
     }
@@ -122,7 +121,7 @@ void BaseTrackCache::ensureCached(TrackId trackId) {
     updateTrackInIndex(trackId);
 }
 
-void BaseTrackCache::ensureCached(QSet<TrackId> trackIds) {
+void BaseTrackCache::ensureCached(const QSet<TrackId>& trackIds) {
     updateTracksInIndex(trackIds);
 }
 
@@ -407,11 +406,16 @@ void BaseTrackCache::getTrackValueForColumn(TrackPointer pTrack,
         trackValue.setValue(mixxx::RgbColor::toQVariant(pTrack->getColor()));
     } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART_LOCATION) == column) {
         trackValue.setValue(pTrack->getCoverInfo().coverLocation);
-    } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART_HASH) == column ||
-               fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART) == column) {
+    } else if (
+            fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART) == column ||
+            fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART_HASH) == column) {
         // For sorting, we give COLUMN_LIBRARYTABLE_COVERART the same value as
-        // the cover hash.
-        trackValue.setValue(pTrack->getCoverHash());
+        // the cover digest.
+        trackValue.setValue(pTrack->getCoverInfo().imageDigest());
+    } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART_COLOR) == column) {
+        trackValue.setValue(mixxx::RgbColor::toQVariant(pTrack->getCoverInfo().color));
+    } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART_DIGEST) == column) {
+        trackValue.setValue(pTrack->getCoverInfo().imageDigest());
     } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART_SOURCE) == column) {
         trackValue.setValue(static_cast<int>(pTrack->getCoverInfo().source));
     } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COVERART_TYPE) == column) {
@@ -675,8 +679,10 @@ int BaseTrackCache::findSortInsertionPoint(TrackPointer pTrack,
     return min;
 }
 
-int BaseTrackCache::compareColumnValues(int sortColumn, Qt::SortOrder sortOrder,
-                                        QVariant val1, QVariant val2) const {
+int BaseTrackCache::compareColumnValues(int sortColumn,
+        Qt::SortOrder sortOrder,
+        const QVariant& val1,
+        const QVariant& val2) const {
     int result = 0;
 
     if (sortColumn == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_YEAR) ||

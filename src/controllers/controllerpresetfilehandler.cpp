@@ -1,8 +1,3 @@
-/// @file controllerpresetfilehandler.cpp
-/// @author Sean Pappalardo spappalardo@mixxx.org
-/// @date Mon 9 Apr 2012
-/// @brief Handles loading and saving of Controller presets.
-
 #include "controllers/controllerpresetfilehandler.h"
 #include "controllers/controllermanager.h"
 #include "controllers/defs_controllers.h"
@@ -99,6 +94,8 @@ void ControllerPresetFileHandler::parsePresetInfo(
     preset->setDescription(description.isNull() ? "" : description.text());
     QDomElement forums = info.firstChildElement("forums");
     preset->setForumLink(forums.isNull() ? "" : forums.text());
+    QDomElement manualPage = info.firstChildElement("manual");
+    preset->setManualPage(manualPage.isNull() ? "" : manualPage.text());
     QDomElement wiki = info.firstChildElement("wiki");
     preset->setWikiLink(wiki.isNull() ? "" : wiki.text());
 }
@@ -144,10 +141,24 @@ void ControllerPresetFileHandler::addScriptFilesToPreset(
         preset->addScriptFile(filename, functionPrefix, file);
         scriptFile = scriptFile.nextSiblingElement("file");
     }
+
+    QString moduleFileName = controller.firstChildElement("module").text();
+
+    if (moduleFileName.isEmpty()) {
+        return;
+    }
+
+    QFileInfo moduleFileInfo(preset->dirPath().absoluteFilePath(moduleFileName));
+    if (!moduleFileInfo.isFile()) {
+        qWarning() << "Controller Module is not a file:" << moduleFileInfo.absoluteFilePath();
+        return;
+    }
+
+    preset->setModuleFileInfo(moduleFileInfo);
 }
 
 bool ControllerPresetFileHandler::writeDocument(
-        QDomDocument root, const QString fileName) const {
+        const QDomDocument& root, const QString& fileName) const {
     // Need to do this on Windows
     QDir directory;
     if (!directory.mkpath(fileName.left(fileName.lastIndexOf("/")))) {
@@ -173,8 +184,8 @@ bool ControllerPresetFileHandler::writeDocument(
 
 void addTextTag(QDomDocument& doc,
         QDomElement& holder,
-        QString tagName,
-        QString tagText) {
+        const QString& tagName,
+        const QString& tagText) {
     QDomElement tag = doc.createElement(tagName);
     QDomText textNode = doc.createTextNode(tagText);
     tag.appendChild(textNode);

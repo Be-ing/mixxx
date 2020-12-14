@@ -1,11 +1,13 @@
+#include "effects/effect.h"
+
 #include <QtDebug>
 
-#include "effects/effect.h"
 #include "effects/effectprocessor.h"
 #include "effects/effectsmanager.h"
 #include "effects/effectxmlelements.h"
-#include "engine/effects/engineeffectchain.h"
 #include "engine/effects/engineeffect.h"
+#include "engine/effects/engineeffectchain.h"
+#include "moc_effect.cpp"
 #include "util/xml.h"
 
 Effect::Effect(EffectsManager* pEffectsManager,
@@ -181,7 +183,7 @@ EffectParameter* Effect::getFilteredParameterForSlot(ParameterFilterFnc filterFn
     // It's normal to ask for a parameter that doesn't exist. Callers must check
     // for NULL.
     unsigned int num = 0;
-    for (const auto& parameter: m_parameters) {
+    for (const auto& parameter : qAsConst(m_parameters)) {
         if (parameter->manifest()->showInParameterSlot() && filterFnc(parameter)) {
             if(num == slotNumber) {
                 return parameter;

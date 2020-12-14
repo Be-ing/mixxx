@@ -1,5 +1,4 @@
-#ifndef EFFECTSMANAGER_H
-#define EFFECTSMANAGER_H
+#pragma once
 
 #include <QObject>
 #include <QHash>
@@ -47,8 +46,8 @@ class EffectsManager : public QObject {
     // takes ownership of the backend, and will delete it when EffectsManager is
     // being deleted. Not thread safe -- use only from the GUI thread.
     void addEffectsBackend(EffectsBackend* pEffectsBackend);
-    void registerInputChannel(const ChannelHandleAndGroup& handle_group);
-    void registerOutputChannel(const ChannelHandleAndGroup& handle_group);
+    void registerInputChannel(const ChannelHandleAndGroup& handleGroup);
+    void registerOutputChannel(const ChannelHandleAndGroup& handleGroup);
     const QSet<ChannelHandleAndGroup>& registeredInputChannels() const;
     const QSet<ChannelHandleAndGroup>& registeredOutputChannels() const;
 
@@ -143,6 +142,3 @@ class EffectsManager : public QObject {
 
     DISALLOW_COPY_AND_ASSIGN(EffectsManager);
 };
-
-
-#endif /* EFFECTSMANAGER_H */

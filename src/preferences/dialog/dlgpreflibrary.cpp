@@ -1,16 +1,18 @@
+#include "preferences/dialog/dlgpreflibrary.h"
+
+#include <QApplication>
 #include <QDesktopServices>
-#include <QStandardPaths>
 #include <QDir>
 #include <QFileDialog>
-#include <QStringList>
-#include <QUrl>
-#include <QApplication>
 #include <QFontDialog>
 #include <QFontMetrics>
 #include <QMessageBox>
+#include <QStandardPaths>
+#include <QStringList>
+#include <QUrl>
 
-#include "preferences/dialog/dlgpreflibrary.h"
 #include "library/dlgtrackmetadataexport.h"
+#include "moc_dlgpreflibrary.cpp"
 #include "sources/soundsourceproxy.h"
 #include "widget/wsearchlineedit.h"
 
@@ -30,24 +32,38 @@ DlgPrefLibrary::DlgPrefLibrary(
           m_iOriginalTrackTableRowHeight(Library::kDefaultRowHeightPx) {
     setupUi(this);
 
-    connect(this, SIGNAL(requestAddDir(QString)),
-            m_pLibrary, SLOT(slotRequestAddDir(QString)));
-    connect(this, SIGNAL(requestRemoveDir(QString, Library::RemovalType)),
-            m_pLibrary, SLOT(slotRequestRemoveDir(QString, Library::RemovalType)));
-    connect(this, SIGNAL(requestRelocateDir(QString,QString)),
-            m_pLibrary, SLOT(slotRequestRelocateDir(QString,QString)));
-    connect(PushButtonAddDir, SIGNAL(clicked()),
-            this, SLOT(slotAddDir()));
-    connect(PushButtonRemoveDir, SIGNAL(clicked()),
-            this, SLOT(slotRemoveDir()));
-    connect(PushButtonRelocateDir, SIGNAL(clicked()),
-            this, SLOT(slotRelocateDir()));
+    connect(this,
+            &DlgPrefLibrary::requestAddDir,
+            m_pLibrary,
+            &Library::slotRequestAddDir);
+    connect(this,
+            &DlgPrefLibrary::requestRemoveDir,
+            m_pLibrary,
+            &Library::slotRequestRemoveDir);
+    connect(this,
+            &DlgPrefLibrary::requestRelocateDir,
+            m_pLibrary,
+            &Library::slotRequestRelocateDir);
+    connect(PushButtonAddDir,
+            &QPushButton::clicked,
+            this,
+            &DlgPrefLibrary::slotAddDir);
+    connect(PushButtonRemoveDir,
+            &QPushButton::clicked,
+            this,
+            &DlgPrefLibrary::slotRemoveDir);
+    connect(PushButtonRelocateDir,
+            &QPushButton::clicked,
+            this,
+            &DlgPrefLibrary::slotRelocateDir);
 
     // Set default direction as stored in config file
     int rowHeight = m_pLibrary->getTrackTableRowHeight();
     spinBoxRowHeight->setValue(rowHeight);
-    connect(spinBoxRowHeight, SIGNAL(valueChanged(int)),
-            this, SLOT(slotRowHeightValueChanged(int)));
+    connect(spinBoxRowHeight,
+            QOverload<int>::of(&QSpinBox::valueChanged),
+            this,
+            &DlgPrefLibrary::slotRowHeightValueChanged);
 
     searchDebouncingTimeoutSpinBox->setMinimum(WSearchLineEdit::kMinDebouncingTimeoutMillis);
     searchDebouncingTimeoutSpinBox->setMaximum(WSearchLineEdit::kMaxDebouncingTimeoutMillis);
@@ -56,11 +72,12 @@ DlgPrefLibrary::DlgPrefLibrary(
                     ConfigKey("[Library]","SearchDebouncingTimeoutMillis"),
                     WSearchLineEdit::kDefaultDebouncingTimeoutMillis);
     searchDebouncingTimeoutSpinBox->setValue(searchDebouncingTimeoutMillis);
-    connect(searchDebouncingTimeoutSpinBox, SIGNAL(valueChanged(int)),
-            this, SLOT(slotSearchDebouncingTimeoutMillisChanged(int)));
+    connect(searchDebouncingTimeoutSpinBox,
+            QOverload<int>::of(&QSpinBox::valueChanged),
+            this,
+            &DlgPrefLibrary::slotSearchDebouncingTimeoutMillisChanged);
 
-    connect(libraryFontButton, SIGNAL(clicked()),
-            this, SLOT(slotSelectFont()));
+    connect(libraryFontButton, &QAbstractButton::clicked, this, &DlgPrefLibrary::slotSelectFont);
 
     // TODO(XXX) this string should be extracted from the soundsources
     QString builtInFormatsStr = "Ogg Vorbis, FLAC, WAVE, AIFF";
@@ -81,8 +98,10 @@ DlgPrefLibrary::DlgPrefLibrary(
 #endif
     builtInFormats->setText(builtInFormatsStr);
 
-    connect(checkBox_SyncTrackMetadataExport, SIGNAL(toggled(bool)),
-            this, SLOT(slotSyncTrackMetadataExportToggled()));
+    connect(checkBox_SyncTrackMetadataExport,
+            &QCheckBox::toggled,
+            this,
+            &DlgPrefLibrary::slotSyncTrackMetadataExportToggled);
 
     // Initialize the controls after all slots have been connected
     slotUpdate();
@@ -179,13 +198,17 @@ void DlgPrefLibrary::slotUpdate() {
             ConfigKey("[Library]", "ShowSeratoLibrary"), true));
 
     switch (m_pConfig->getValue<int>(
-            ConfigKey("[Library]","TrackLoadAction"), LOAD_TO_DECK)) {
-    case ADD_TO_AUTODJ_BOTTOM:
-            radioButton_dbclick_bottom->setChecked(true);
-            break;
-    case ADD_TO_AUTODJ_TOP:
-            radioButton_dbclick_top->setChecked(true);
-            break;
+            ConfigKey("[Library]", "TrackLoadAction"),
+            static_cast<int>(TrackDoubleClickAction::LoadToDeck))) {
+    case static_cast<int>(TrackDoubleClickAction::AddToAutoDJBottom):
+        radioButton_dbclick_bottom->setChecked(true);
+        break;
+    case static_cast<int>(TrackDoubleClickAction::AddToAutoDJTop):
+        radioButton_dbclick_top->setChecked(true);
+        break;
+    case static_cast<int>(TrackDoubleClickAction::Ignore):
+        radioButton_dbclick_ignore->setChecked(true);
+        break;
     default:
             radioButton_dbclick_deck->setChecked(true);
             break;
@@ -252,6 +275,7 @@ void DlgPrefLibrary::slotRemoveDir() {
         tr("Delete Track Metadata"), QMessageBox::AcceptRole);
     QPushButton* leaveUnchangedButton = removeMsgBox.addButton(
         tr("Leave Tracks Unchanged"), QMessageBox::AcceptRole);
+    Q_UNUSED(leaveUnchangedButton); // Only used in DEBUG_ASSERT
     removeMsgBox.setDefaultButton(cancelButton);
     removeMsgBox.exec();
 
@@ -259,17 +283,16 @@ void DlgPrefLibrary::slotRemoveDir() {
         return;
     }
 
-    bool deleteAll = removeMsgBox.clickedButton() == deleteAllButton;
-    bool hideAll = removeMsgBox.clickedButton() == hideAllButton;
-    bool leaveUnchanged = removeMsgBox.clickedButton() == leaveUnchangedButton;
-
-    Library::RemovalType removalType = Library::LeaveTracksUnchanged;
-    if (leaveUnchanged) {
-        removalType = Library::LeaveTracksUnchanged;
-    } else if (deleteAll) {
-        removalType = Library::PurgeTracks;
-    } else if (hideAll) {
-        removalType = Library::HideTracks;
+    Library::RemovalType removalType;
+    if (removeMsgBox.clickedButton() == hideAllButton) {
+        removalType = Library::RemovalType::HideTracks;
+    } else if (removeMsgBox.clickedButton() == deleteAllButton) {
+        removalType = Library::RemovalType::PurgeTracks;
+    } else {
+        // Only used in DEBUG_ASSERT
+        Q_UNUSED(leaveUnchangedButton);
+        DEBUG_ASSERT(removeMsgBox.clickedButton() == leaveUnchangedButton);
+        removalType = Library::RemovalType::KeepTracks;
     }
 
     emit requestRemoveDir(fd, removalType);
@@ -321,11 +344,13 @@ void DlgPrefLibrary::slotApply() {
             ConfigValue((int)checkBox_show_serato->isChecked()));
     int dbclick_status;
     if (radioButton_dbclick_bottom->isChecked()) {
-            dbclick_status = ADD_TO_AUTODJ_BOTTOM;
+        dbclick_status = static_cast<int>(TrackDoubleClickAction::AddToAutoDJBottom);
     } else if (radioButton_dbclick_top->isChecked()) {
-            dbclick_status = ADD_TO_AUTODJ_TOP;
-    } else {
-            dbclick_status = LOAD_TO_DECK;
+        dbclick_status = static_cast<int>(TrackDoubleClickAction::AddToAutoDJTop);
+    } else if (radioButton_dbclick_deck->isChecked()) {
+        dbclick_status = static_cast<int>(TrackDoubleClickAction::LoadToDeck);
+    } else { // radioButton_dbclick_ignore
+        dbclick_status = static_cast<int>(TrackDoubleClickAction::Ignore);
     }
     m_pConfig->set(ConfigKey("[Library]","TrackLoadAction"),
                 ConfigValue(dbclick_status));

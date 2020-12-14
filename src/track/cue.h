@@ -3,14 +3,14 @@
 #include <QColor>
 #include <QMutex>
 #include <QObject>
+#include <memory>
+#include <type_traits> // static_assert
 
 #include "audio/types.h"
 #include "track/cueinfo.h"
-#include "track/trackid.h"
 #include "util/color/rgbcolor.h"
-#include "util/memory.h"
+#include "util/db/dbid.h"
 
-class CuePosition;
 class CueDAO;
 class Track;
 
@@ -18,27 +18,33 @@ class Cue : public QObject {
     Q_OBJECT
 
   public:
+    /// A position value for the cue that signals its position is not set
     static constexpr double kNoPosition = -1.0;
+
+    /// Invalid hot cue index
     static constexpr int kNoHotCue = -1;
+
+    static_assert(kNoHotCue != mixxx::kFirstHotCueIndex,
+            "Conflicting definitions of invalid and first hot cue index");
 
     Cue();
     Cue(
             const mixxx::CueInfo& cueInfo,
-            mixxx::audio::SampleRate sampleRate);
+            mixxx::audio::SampleRate sampleRate,
+            bool setDirty);
+    /// Load entity from database.
     Cue(
-            int id,
-            TrackId trackId,
+            DbId id,
             mixxx::CueType type,
             double position,
             double length,
             int hotCue,
-            QString label,
+            const QString& label,
             mixxx::RgbColor color);
     ~Cue() override = default;
 
     bool isDirty() const;
-    int getId() const;
-    TrackId getTrackId() const;
+    DbId getId() const;
 
     mixxx::CueType getType() const;
     void setType(mixxx::CueType type);
@@ -57,8 +63,7 @@ class Cue : public QObject {
             int hotCue = kNoHotCue);
 
     QString getLabel() const;
-    void setLabel(
-            QString label = QString());
+    void setLabel(const QString& label);
 
     mixxx::RgbColor getColor() const;
     void setColor(mixxx::RgbColor color);
@@ -74,14 +79,12 @@ class Cue : public QObject {
   private:
     void setDirty(bool dirty);
 
-    void setId(int id);
-    void setTrackId(TrackId trackId);
+    void setId(DbId dbId);
 
     mutable QMutex m_mutex;
 
     bool m_bDirty;
-    int m_iId;
-    TrackId m_trackId;
+    DbId m_dbId;
     mixxx::CueType m_type;
     double m_sampleStartPosition;
     double m_sampleEndPosition;

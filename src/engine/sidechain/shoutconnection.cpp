@@ -1,6 +1,3 @@
-// shoutconnection.cpp
-// Created July 4th 2017 by Stéphane Lepin <stephane.lepin@gmail.com>
-
 #include <QUrl>
 
 // These includes are only required by ignoreSigpipe, which is unix-only
@@ -25,13 +22,13 @@
 #ifdef __OPUS__
 #include "encoder/encoderopus.h"
 #endif
+#include "engine/sidechain/shoutconnection.h"
 #include "mixer/playerinfo.h"
+#include "moc_shoutconnection.cpp"
 #include "preferences/usersettings.h"
 #include "recording/defs_recording.h"
 #include "track/track.h"
 #include "util/logger.h"
-
-#include <engine/sidechain/shoutconnection.h>
 
 namespace {
 
@@ -383,8 +380,13 @@ void ShoutConnection::updateFromPreferences() {
         qWarning() << "Error: unknown bit rate:" << iBitrate;
     }
 
-    int iMasterSamplerate = m_pMasterSamplerate->get();
-    if (m_format_is_ov && iMasterSamplerate == 96000) {
+    auto masterSamplerate = mixxx::audio::SampleRate::fromDouble(m_pMasterSamplerate->get());
+    VERIFY_OR_DEBUG_ASSERT(masterSamplerate.isValid()) {
+        qWarning() << "Invalid sample rate!" << masterSamplerate;
+        return;
+    }
+
+    if (m_format_is_ov && masterSamplerate == 96000) {
         errorDialog(tr("Broadcasting at 96 kHz with Ogg Vorbis is not currently "
                        "supported. Please try a different sample rate or switch "
                        "to a different encoding."),
@@ -394,7 +396,7 @@ void ShoutConnection::updateFromPreferences() {
     }
 
 #ifdef __OPUS__
-    if(m_format_is_opus && iMasterSamplerate != EncoderOpus::getMasterSamplerate()) {
+    if (m_format_is_opus && masterSamplerate != EncoderOpus::getMasterSamplerate()) {
         errorDialog(
             EncoderOpus::getInvalidSamplerateMessage(),
             tr("Unsupported sample rate")
@@ -443,7 +445,8 @@ void ShoutConnection::updateFromPreferences() {
                     pBroadcastSettings, this);
 
     QString errorMsg;
-    if(m_encoder->initEncoder(iMasterSamplerate, errorMsg) < 0) {
+    // TODO(XXX): Use mixxx::audio::SampleRate instead of int in initEncoder
+    if (m_encoder->initEncoder(static_cast<int>(masterSamplerate), errorMsg) < 0) {
         // e.g., if lame is not found
         // init m_encoder itself will display a message box
         kLogger.warning() << "**** Encoder init failed";
@@ -859,7 +862,7 @@ void ShoutConnection::updateMetaData() {
     }
 }
 
-void ShoutConnection::errorDialog(QString text, QString detailedError) {
+void ShoutConnection::errorDialog(const QString& text, const QString& detailedError) {
     qWarning() << "Streaming error: " << detailedError;
     ErrorDialogProperties* props = ErrorDialogHandler::instance()->newDialogProperties();
     props->setType(DLG_WARNING);
@@ -875,7 +878,7 @@ void ShoutConnection::errorDialog(QString text, QString detailedError) {
     setState(NETWORKSTREAMWORKER_STATE_ERROR);
 }
 
-void ShoutConnection::infoDialog(QString text, QString detailedInfo) {
+void ShoutConnection::infoDialog(const QString& text, const QString& detailedInfo) {
     ErrorDialogProperties* props = ErrorDialogHandler::instance()->newDialogProperties();
     props->setType(DLG_INFO);
     props->setTitle(tr("Connection message"));
@@ -906,7 +909,7 @@ bool ShoutConnection::waitForRetry() {
 
     if (delay > 0) {
         m_enabledMutex.lock();
-        m_waitEnabled.wait(&m_enabledMutex, delay * 1000);
+        m_waitEnabled.wait(&m_enabledMutex, static_cast<unsigned long>(delay * 1000));
         m_enabledMutex.unlock();
         if (!m_pProfile->getEnabled()) {
             return false;

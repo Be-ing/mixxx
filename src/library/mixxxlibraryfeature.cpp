@@ -1,6 +1,3 @@
-// mixxxlibraryfeature.cpp
-// Created 8/23/2009 by RJ Ryan (rryan@mit.edu)
-
 #include "library/mixxxlibraryfeature.h"
 
 #include <QtDebug>
@@ -18,6 +15,7 @@
 #include "library/trackcollection.h"
 #include "library/trackcollectionmanager.h"
 #include "library/treeitem.h"
+#include "moc_mixxxlibraryfeature.cpp"
 #include "sources/soundsourceproxy.h"
 #include "util/dnd.h"
 #include "widget/wlibrary.h"
@@ -33,6 +31,10 @@ MixxxLibraryFeature::MixxxLibraryFeature(Library* pLibrary,
           m_pMissingView(nullptr),
           m_pHiddenView(nullptr) {
     QStringList columns;
+    // Do not reorder the following columns!! Otherwise all
+    // user customizations for the visible columns are mixed
+    // up.
+    // See also: https://mixxx.zulipchat.com/#narrow/stream/109695-_support/topic/Library.20brocken.20after.20update
     columns << "library." + LIBRARYTABLE_ID
             << "library." + LIBRARYTABLE_PLAYED
             << "library." + LIBRARYTABLE_TIMESPLAYED
@@ -64,6 +66,8 @@ MixxxLibraryFeature::MixxxLibraryFeature(Library* pLibrary,
             << "library." + LIBRARYTABLE_COVERART_SOURCE
             << "library." + LIBRARYTABLE_COVERART_TYPE
             << "library." + LIBRARYTABLE_COVERART_LOCATION
+            << "library." + LIBRARYTABLE_COVERART_COLOR
+            << "library." + LIBRARYTABLE_COVERART_DIGEST
             << "library." + LIBRARYTABLE_COVERART_HASH;
 
     QSqlQuery query(m_pTrackCollection->database());
@@ -146,8 +150,15 @@ void MixxxLibraryFeature::refreshLibraryModels() {
     }
 }
 
+void MixxxLibraryFeature::searchAndActivate(const QString& query) {
+    VERIFY_OR_DEBUG_ASSERT(m_pLibraryTableModel) {
+        return;
+    }
+    m_pLibraryTableModel->search(query);
+    activate();
+}
+
 void MixxxLibraryFeature::activate() {
-    qDebug() << "MixxxLibraryFeature::activate()";
     emit showTrackModel(m_pLibraryTableModel);
     emit enableCoverArtDisplay(true);
 }
@@ -163,7 +174,7 @@ void MixxxLibraryFeature::activateChild(const QModelIndex& index) {
     emit enableCoverArtDisplay(true);
 }
 
-bool MixxxLibraryFeature::dropAccept(QList<QUrl> urls, QObject* pSource) {
+bool MixxxLibraryFeature::dropAccept(const QList<QUrl>& urls, QObject* pSource) {
     if (pSource) {
         return false;
     } else {
@@ -173,7 +184,7 @@ bool MixxxLibraryFeature::dropAccept(QList<QUrl> urls, QObject* pSource) {
     }
 }
 
-bool MixxxLibraryFeature::dragMoveAccept(QUrl url) {
+bool MixxxLibraryFeature::dragMoveAccept(const QUrl& url) {
     return SoundSourceProxy::isUrlSupported(url) ||
             Parser::isPlaylistFilenameSupported(url.toLocalFile());
 }

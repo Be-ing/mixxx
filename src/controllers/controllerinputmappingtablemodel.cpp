@@ -1,11 +1,13 @@
 #include "controllers/controllerinputmappingtablemodel.h"
-#include "controllers/midi/midimessage.h"
-#include "controllers/midi/midiutils.h"
+
 #include "controllers/delegates/controldelegate.h"
+#include "controllers/delegates/midibytedelegate.h"
 #include "controllers/delegates/midichanneldelegate.h"
 #include "controllers/delegates/midiopcodedelegate.h"
-#include "controllers/delegates/midibytedelegate.h"
 #include "controllers/delegates/midioptionsdelegate.h"
+#include "controllers/midi/midimessage.h"
+#include "controllers/midi/midiutils.h"
+#include "moc_controllerinputmappingtablemodel.cpp"
 
 ControllerInputMappingTableModel::ControllerInputMappingTableModel(QObject* pParent)
         : ControllerMappingTableModel(pParent) {
@@ -19,7 +21,7 @@ void ControllerInputMappingTableModel::apply() {
         // Clear existing input mappings and insert all the input mappings in
         // the table into the preset.
         QMultiHash<uint16_t, MidiInputMapping> mappings;
-        for (const MidiInputMapping& mapping : m_midiInputMappings) {
+        for (const MidiInputMapping& mapping : qAsConst(m_midiInputMappings)) {
             // There can be multiple input mappings for the same input
             // MidiKey, so we need to use a QMultiHash here.
             mappings.insert(mapping.key.key, mapping);

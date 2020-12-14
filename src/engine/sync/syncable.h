@@ -1,5 +1,4 @@
-#ifndef SYNCABLE_H
-#define SYNCABLE_H
+#pragma once
 
 #include <QString>
 
@@ -40,7 +39,7 @@ inline bool isMaster(SyncMode mode) {
 /// in Master Sync.
 class Syncable {
   public:
-    virtual ~Syncable() { }
+    virtual ~Syncable() = default;
     virtual const QString& getGroup() const = 0;
     virtual EngineChannel* getChannel() const = 0;
 
@@ -99,7 +98,7 @@ class Syncable {
 /// information about sync change requests.
 class SyncableListener {
   public:
-    virtual ~SyncableListener() {}
+    virtual ~SyncableListener() = default;
 
     // Used by Syncables to tell EngineSync it wants to be enabled in a
     // specific mode. If the state change is accepted, EngineSync calls
@@ -132,5 +131,3 @@ class SyncableListener {
 
     virtual Syncable* getMasterSyncable() = 0;
 };
-
-#endif /* SYNCABLE_H */

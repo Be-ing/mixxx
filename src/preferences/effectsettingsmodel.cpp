@@ -1,5 +1,6 @@
-#include <preferences/effectsettingsmodel.h>
+#include "preferences/effectsettingsmodel.h"
 
+#include "moc_effectsettingsmodel.cpp"
 
 namespace {
 const int kColumnEnabled = 0;
@@ -25,7 +26,7 @@ void EffectSettingsModel::resetFromEffectManager(EffectsManager* pEffectsManager
         m_profiles.clear();
     }
 
-    for (EffectManifestPointer pManifest : pEffectsManager->getAvailableEffectManifests()) {
+    for (const EffectManifestPointer& pManifest : pEffectsManager->getAvailableEffectManifests()) {
         const bool visibility = pEffectsManager->getEffectVisibility(pManifest);
         addProfileToModel(EffectProfilePtr(new EffectProfile(pManifest, visibility)));
     }

@@ -1,29 +1,12 @@
-/***************************************************************************
-                          dlgprefvinyl.h  -  description
-                             -------------------
-    begin                : Thu Oct 23 2006
-    copyright            : (C) 2006 by Stefan Langhammer
-    email                : stefan.langhammer@9elements.com
- ***************************************************************************/
+#pragma once
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
-#ifndef DLGPREFVINYL_H
-#define DLGPREFVINYL_H
-
+#include <QSpinBox>
 #include <QWidget>
 
 #include "preferences/dialog/ui_dlgprefvinyldlg.h"
+#include "preferences/dlgpreferencepage.h"
 #include "preferences/usersettings.h"
 #include "vinylcontrol/vinylcontrolsignalwidget.h"
-#include "preferences/dlgpreferencepage.h"
 
 class ControlProxy;
 class VinylControlManager;
@@ -49,10 +32,10 @@ class DlgPrefVinyl : public DlgPreferencePage, Ui::DlgPrefVinylDlg  {
 
   private slots:
     void slotNumDecksChanged(double);
-    void slotVinylType1Changed(QString);
-    void slotVinylType2Changed(QString);
-    void slotVinylType3Changed(QString);
-    void slotVinylType4Changed(QString);
+    void slotVinylType1Changed(const QString&);
+    void slotVinylType2Changed(const QString&);
+    void slotVinylType3Changed(const QString&);
+    void slotVinylType4Changed(const QString&);
 
   private:
     void setDeckWidgetsVisible(int deck, bool visible);
@@ -60,9 +43,8 @@ class DlgPrefVinyl : public DlgPreferencePage, Ui::DlgPrefVinylDlg  {
     void setDeck2WidgetsVisible(bool visible);
     void setDeck3WidgetsVisible(bool visible);
     void setDeck4WidgetsVisible(bool visible);
-    void verifyAndSaveLeadInTime(QLineEdit* widget, QString group, QString vinyl_type);
-    int getDefaultLeadIn(QString vinyl_type) const;
-
+    void verifyAndSaveLeadInTime(QSpinBox* widget, const QString& group, const QString& vinyl_type);
+    int getDefaultLeadIn(const QString& vinyl_type) const;
 
     QList<VinylControlSignalWidget*> m_signalWidgets;
 
@@ -71,5 +53,3 @@ class DlgPrefVinyl : public DlgPreferencePage, Ui::DlgPrefVinylDlg  {
     QList<ControlProxy*> m_COSpeeds;
     ControlProxy* m_pNumDecks;
 };
-
-#endif

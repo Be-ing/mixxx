@@ -1,20 +1,15 @@
-/**
-  * @file controllermanager.cpp
-  * @author Sean Pappalardo spappalardo@mixxx.org
-  * @date Sat Apr 30 2011
-  * @brief Manages creation/enumeration/deletion of hardware controllers.
-  */
+#include "controllers/controllermanager.h"
 
 #include <QSet>
+#include <QThread>
 
-#include "util/trace.h"
-#include "controllers/controllermanager.h"
-#include "controllers/defs_controllers.h"
 #include "controllers/controllerlearningeventfilter.h"
+#include "controllers/defs_controllers.h"
+#include "controllers/midi/portmidienumerator.h"
+#include "moc_controllermanager.cpp"
 #include "util/cmdlineargs.h"
 #include "util/time.h"
-
-#include "controllers/midi/portmidienumerator.h"
+#include "util/trace.h"
 #ifdef __HSS1394__
 #include "controllers/midi/hss1394enumerator.h"
 #endif
@@ -27,18 +22,18 @@
 #include "controllers/bulk/bulkenumerator.h"
 #endif
 
-namespace {
 // http://developer.qt.nokia.com/wiki/Threads_Events_QObjects
 
 // Poll every 1ms (where possible) for good controller response
 #ifdef __LINUX__
 // Many Linux distros ship with the system tick set to 250Hz so 1ms timer
 // reportedly causes CPU hosage. See Bug #990992 rryan 6/2012
-const int kPollIntervalMillis = 5;
+const mixxx::Duration ControllerManager::kPollInterval = mixxx::Duration::fromMillis(5);
 #else
-const int kPollIntervalMillis = 1;
+const mixxx::Duration ControllerManager::kPollInterval = mixxx::Duration::fromMillis(1);
 #endif
 
+namespace {
 /// Strip slashes and spaces from device name, so that it can be used as config
 /// key or a filename.
 QString sanitizeDeviceName(QString name) {
@@ -64,7 +59,7 @@ QFileInfo findPresetFile(const QString& pathOrFilename, const QStringList& paths
 } // anonymous namespace
 
 QString firstAvailableFilename(QSet<QString>& filenames,
-                               const QString originalFilename) {
+        const QString& originalFilename) {
     QString filename = originalFilename;
     int i = 1;
     while (filenames.contains(filename)) {
@@ -97,9 +92,8 @@ ControllerManager::ControllerManager(UserSettingsPointer pConfig)
         QDir().mkpath(userPresets);
     }
 
-    m_pollTimer.setInterval(kPollIntervalMillis);
-    connect(&m_pollTimer, SIGNAL(timeout()),
-            this, SLOT(pollDevices()));
+    m_pollTimer.setInterval(kPollInterval.toIntegerMillis());
+    connect(&m_pollTimer, &QTimer::timeout, this, &ControllerManager::pollDevices);
 
     m_pThread = new QThread;
     m_pThread->setObjectName("Controller");
@@ -111,16 +105,16 @@ ControllerManager::ControllerManager(UserSettingsPointer pConfig)
     // audio directly, like when scratching
     m_pThread->start(QThread::HighPriority);
 
-    connect(this, SIGNAL(requestInitialize()),
-            this, SLOT(slotInitialize()));
-    connect(this, SIGNAL(requestSetUpDevices()),
-            this, SLOT(slotSetUpDevices()));
-    connect(this, SIGNAL(requestShutdown()),
-            this, SLOT(slotShutdown()));
+    connect(this, &ControllerManager::requestInitialize, this, &ControllerManager::slotInitialize);
+    connect(this,
+            &ControllerManager::requestSetUpDevices,
+            this,
+            &ControllerManager::slotSetUpDevices);
+    connect(this, &ControllerManager::requestShutdown, this, &ControllerManager::slotShutdown);
 
     // Signal that we should run slotInitialize once our event loop has started
     // up.
-    emit requestInitialize();
+    emit requestInitialize(); // clazy:exclude=incorrect-emit
 }
 
 ControllerManager::~ControllerManager() {
@@ -224,7 +218,7 @@ QList<Controller*> ControllerManager::getControllerList(bool bOutputDevices, boo
     return filteredDeviceList;
 }
 
-QString ControllerManager::getConfiguredPresetFileForDevice(QString name) {
+QString ControllerManager::getConfiguredPresetFileForDevice(const QString& name) {
     return m_pConfig->getValueString(ConfigKey("[ControllerPreset]", sanitizeDeviceName(name)));
 }
 
@@ -352,14 +346,14 @@ void ControllerManager::pollDevices() {
     }
 
     mixxx::Duration start = mixxx::Time::elapsed();
-    for (Controller* pDevice : m_controllers) {
+    for (Controller* pDevice : qAsConst(m_controllers)) {
         if (pDevice->isOpen() && pDevice->isPolling()) {
             pDevice->poll();
         }
     }
 
     mixxx::Duration duration = mixxx::Time::elapsed() - start;
-    if (duration > mixxx::Duration::fromMillis(kPollIntervalMillis)) {
+    if (duration > kPollInterval) {
         m_skipPoll = true;
     }
     //qDebug() << "ControllerManager::pollDevices()" << duration << start;

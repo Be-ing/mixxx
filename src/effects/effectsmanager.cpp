@@ -1,21 +1,21 @@
 #include "effects/effectsmanager.h"
 
 #include <QMetaType>
-
 #include <algorithm>
 
-#include "engine/effects/engineeffectsmanager.h"
 #include "effects/effectchainmanager.h"
 #include "effects/effectsbackend.h"
 #include "effects/effectslot.h"
 #include "engine/effects/engineeffect.h"
-#include "engine/effects/engineeffectrack.h"
 #include "engine/effects/engineeffectchain.h"
+#include "engine/effects/engineeffectrack.h"
+#include "engine/effects/engineeffectsmanager.h"
+#include "moc_effectsmanager.cpp"
 #include "util/assert.h"
 
 namespace {
-const QString kEffectGroupSeparator = "_";
-const QString kGroupClose = "]";
+constexpr QChar kEffectGroupSeparator = '_';
+constexpr QChar kGroupClose = ']';
 const unsigned int kEffectMessagPipeFifoSize = 2048;
 } // anonymous namespace
 
@@ -91,11 +91,15 @@ void EffectsManager::addEffectsBackend(EffectsBackend* pBackend) {
     std::sort(m_availableEffectManifests.begin(), m_availableEffectManifests.end(),
           alphabetizeEffectManifests);
 
-    connect(pBackend, SIGNAL(effectRegistered(EffectManifestPointer)),
-            this, SLOT(slotBackendRegisteredEffect(EffectManifestPointer)));
+    connect(pBackend,
+            &EffectsBackend::effectRegistered,
+            this,
+            &EffectsManager::slotBackendRegisteredEffect);
 
-    connect(pBackend, SIGNAL(effectRegistered(EffectManifestPointer)),
-            this, SIGNAL(availableEffectsUpdated(EffectManifestPointer)));
+    connect(pBackend,
+            &EffectsBackend::effectRegistered,
+            this,
+            &EffectsManager::availableEffectsUpdated);
 }
 
 void EffectsManager::slotBackendRegisteredEffect(EffectManifestPointer pManifest) {
@@ -106,16 +110,16 @@ void EffectsManager::slotBackendRegisteredEffect(EffectManifestPointer pManifest
     m_pNumEffectsAvailable->forceSet(m_availableEffectManifests.size());
 }
 
-void EffectsManager::registerInputChannel(const ChannelHandleAndGroup& handle_group) {
-    m_pEffectChainManager->registerInputChannel(handle_group);
+void EffectsManager::registerInputChannel(const ChannelHandleAndGroup& handleGroup) {
+    m_pEffectChainManager->registerInputChannel(handleGroup);
 }
 
 const QSet<ChannelHandleAndGroup>& EffectsManager::registeredInputChannels() const {
     return m_pEffectChainManager->registeredInputChannels();
 }
 
-void EffectsManager::registerOutputChannel(const ChannelHandleAndGroup& handle_group) {
-    m_pEffectChainManager->registerOutputChannel(handle_group);
+void EffectsManager::registerOutputChannel(const ChannelHandleAndGroup& handleGroup) {
+    m_pEffectChainManager->registerOutputChannel(handleGroup);
 }
 
 const QSet<ChannelHandleAndGroup>& EffectsManager::registeredOutputChannels() const {
@@ -204,7 +208,7 @@ EffectPointer EffectsManager::instantiateEffect(const QString& effectId) {
     if (effectId.isEmpty()) {
         return EffectPointer();
     }
-    for (const auto& pBackend: m_effectsBackends) {
+    for (const auto& pBackend : qAsConst(m_effectsBackends)) {
         if (pBackend->canInstantiateEffect(effectId)) {
             return pBackend->instantiateEffect(this, effectId);
         }

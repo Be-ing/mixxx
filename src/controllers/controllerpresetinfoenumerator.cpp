@@ -1,9 +1,3 @@
-/**
-* @file controllerpresetinfoenumerator.cpp
-* @author Be be.0@gmx.com
-* @date Sat Jul 18 2015
-* @brief Enumerate list of available controller mapping presets
-*/
 #include "controllers/controllerpresetinfoenumerator.h"
 
 #include <QDirIterator>
@@ -56,7 +50,7 @@ void PresetInfoEnumerator::loadSupportedPresets() {
     m_hidPresets.clear();
     m_bulkPresets.clear();
 
-    for (const QString& dirPath : m_controllerDirPaths) {
+    for (const QString& dirPath : qAsConst(m_controllerDirPaths)) {
         QDirIterator it(dirPath);
         while (it.hasNext()) {
             it.next();

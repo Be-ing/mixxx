@@ -10,16 +10,19 @@
 
 #include "control/controlobject.h"
 #include "control/controlproxy.h"
+#include "moc_wwaveformviewer.cpp"
 #include "track/track.h"
 #include "util/dnd.h"
 #include "util/math.h"
-#include "util/widgethelper.h"
 #include "waveform/waveformwidgetfactory.h"
 #include "waveform/widgets/waveformwidgetabstract.h"
 
-WWaveformViewer::WWaveformViewer(const char* group, UserSettingsPointer pConfig, QWidget* parent)
+WWaveformViewer::WWaveformViewer(
+        const QString& group,
+        UserSettingsPointer pConfig,
+        QWidget* parent)
         : WWidget(parent),
-          m_pGroup(group),
+          m_group(group),
           m_pConfig(pConfig),
           m_zoomZoneWidth(20),
           m_bScratching(false),
@@ -28,16 +31,16 @@ WWaveformViewer::WWaveformViewer(const char* group, UserSettingsPointer pConfig,
           m_waveformWidget(nullptr) {
     setMouseTracking(true);
     setAcceptDrops(true);
-    m_pZoom = new ControlProxy(group, "waveform_zoom", this);
+    m_pZoom = new ControlProxy(group, "waveform_zoom", this, ControlFlag::NoAssertIfMissing);
     m_pZoom->connectValueChanged(this, &WWaveformViewer::onZoomChange);
 
     m_pScratchPositionEnable = new ControlProxy(
-            group, "scratch_position_enable", this);
+            group, "scratch_position_enable", this, ControlFlag::NoAssertIfMissing);
     m_pScratchPosition = new ControlProxy(
-            group, "scratch_position", this);
+            group, "scratch_position", this, ControlFlag::NoAssertIfMissing);
     m_pWheel = new ControlProxy(
-            group, "wheel", this);
-    m_pPlayEnabled = new ControlProxy(group, "play", this);
+            group, "wheel", this, ControlFlag::NoAssertIfMissing);
+    m_pPlayEnabled = new ControlProxy(group, "play", this, ControlFlag::NoAssertIfMissing);
 
     setAttribute(Qt::WA_OpaquePaintEvent);
 }
@@ -50,6 +53,7 @@ void WWaveformViewer::setup(const QDomNode& node, const SkinContext& context) {
     if (m_waveformWidget) {
         m_waveformWidget->setup(node, context);
     }
+    m_dimBrightThreshold = m_waveformWidget->getDimBrightThreshold();
 }
 
 void WWaveformViewer::resizeEvent(QResizeEvent* /*event*/) {
@@ -85,11 +89,7 @@ void WWaveformViewer::mousePressEvent(QMouseEvent* event) {
             auto cueAtClickPos = getCuePointerFromCueMark(m_pHoveredMark);
             if (cueAtClickPos) {
                 m_pCueMenuPopup->setTrackAndCue(currentTrack, cueAtClickPos);
-                QPoint cueMenuTopLeft = mixxx::widgethelper::mapPopupToScreen(
-                        *this,
-                        event->globalPos(),
-                        m_pCueMenuPopup->size());
-                m_pCueMenuPopup->popup(cueMenuTopLeft);
+                m_pCueMenuPopup->popup(event->globalPos());
             }
         } else {
             // If we are scratching then disable and reset because the two shouldn't
@@ -185,11 +185,11 @@ void WWaveformViewer::wheelEvent(QWheelEvent *event) {
 }
 
 void WWaveformViewer::dragEnterEvent(QDragEnterEvent* event) {
-    DragAndDropHelper::handleTrackDragEnterEvent(event, m_pGroup, m_pConfig);
+    DragAndDropHelper::handleTrackDragEnterEvent(event, m_group, m_pConfig);
 }
 
 void WWaveformViewer::dropEvent(QDropEvent* event) {
-    DragAndDropHelper::handleTrackDropEvent(event, *this, m_pGroup, m_pConfig);
+    DragAndDropHelper::handleTrackDropEvent(event, *this, m_group, m_pConfig);
 }
 
 void WWaveformViewer::leaveEvent(QEvent*) {
@@ -263,7 +263,7 @@ void WWaveformViewer::setWaveformWidget(WaveformWidgetAbstract* waveformWidget) 
 
 CuePointer WWaveformViewer::getCuePointerFromCueMark(WaveformMarkPointer pMark) const {
     if (pMark && pMark->getHotCue() != Cue::kNoHotCue) {
-        QList<CuePointer> cueList = m_waveformWidget->getTrackInfo()->getCuePoints();
+        const QList<CuePointer> cueList = m_waveformWidget->getTrackInfo()->getCuePoints();
         for (const auto& pCue : cueList) {
             if (pCue->getHotCue() == pMark->getHotCue()) {
                 return pCue;
@@ -274,15 +274,16 @@ CuePointer WWaveformViewer::getCuePointerFromCueMark(WaveformMarkPointer pMark) 
 }
 
 void WWaveformViewer::highlightMark(WaveformMarkPointer pMark) {
-    QColor highlightColor = Color::chooseContrastColor(pMark->fillColor());
-    pMark->setBaseColor(highlightColor);
+    QColor highlightColor = Color::chooseContrastColor(pMark->fillColor(),
+            m_dimBrightThreshold);
+    pMark->setBaseColor(highlightColor, m_dimBrightThreshold);
 }
 
 void WWaveformViewer::unhighlightMark(WaveformMarkPointer pMark) {
     QColor originalColor = mixxx::RgbColor::toQColor(getCuePointerFromCueMark(pMark)->getColor());
-    pMark->setBaseColor(originalColor);
+    pMark->setBaseColor(originalColor, m_dimBrightThreshold);
 }
 
 bool WWaveformViewer::isPlaying() const {
-    return m_pPlayEnabled->get();
+    return m_pPlayEnabled->toBool();
 }

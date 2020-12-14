@@ -1,5 +1,4 @@
-#ifndef COLUMNCACHE_H
-#define COLUMNCACHE_H
+#pragma once
 
 #include <QObject>
 #include <QMap>
@@ -14,7 +13,6 @@
 class ColumnCache : public QObject {
   Q_OBJECT
   public:
-
     enum Column {
         COLUMN_LIBRARYTABLE_INVALID = -1,
         COLUMN_LIBRARYTABLE_ID = 0,
@@ -54,6 +52,8 @@ class ColumnCache : public QObject {
         COLUMN_LIBRARYTABLE_COVERART_SOURCE,
         COLUMN_LIBRARYTABLE_COVERART_TYPE,
         COLUMN_LIBRARYTABLE_COVERART_LOCATION,
+        COLUMN_LIBRARYTABLE_COVERART_COLOR,
+        COLUMN_LIBRARYTABLE_COVERART_DIGEST,
         COLUMN_LIBRARYTABLE_COVERART_HASH,
 
         COLUMN_TRACKLOCATIONSTABLE_FSDELETED,
@@ -121,5 +121,3 @@ class ColumnCache : public QObject {
   private slots:
     void slotSetKeySortOrder(double);
 };
-
-#endif /* COLUMNCACHE_H */

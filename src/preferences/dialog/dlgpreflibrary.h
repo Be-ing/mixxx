@@ -1,5 +1,4 @@
-#ifndef DLGPREFLIBRARY_H
-#define DLGPREFLIBRARY_H
+#pragma once
 
 #include <QFont>
 #include <QStandardItemModel>
@@ -12,17 +11,14 @@
 #include "preferences/dlgpreferencepage.h"
 #include "preferences/usersettings.h"
 
-/**
-  *@author Tue & Ken Haste Andersen
-  */
-
 class DlgPrefLibrary : public DlgPreferencePage, public Ui::DlgPrefLibraryDlg  {
     Q_OBJECT
   public:
-    enum TrackDoubleClickAction {
-        LOAD_TO_DECK,
-        ADD_TO_AUTODJ_BOTTOM,
-        ADD_TO_AUTODJ_TOP
+    enum class TrackDoubleClickAction : int {
+        LoadToDeck = 0,
+        AddToAutoDJBottom = 1,
+        AddToAutoDJTop = 2,
+        Ignore = 3,
     };
 
     DlgPrefLibrary(
@@ -50,9 +46,9 @@ class DlgPrefLibrary : public DlgPreferencePage, public Ui::DlgPrefLibraryDlg  {
   signals:
     void apply();
     void scanLibrary();
-    void requestAddDir(QString dir);
-    void requestRemoveDir(QString dir, Library::RemovalType removalType);
-    void requestRelocateDir(QString currentDir, QString newDir);
+    void requestAddDir(const QString& dir);
+    void requestRemoveDir(const QString& dir, Library::RemovalType removalType);
+    void requestRelocateDir(const QString& currentDir, const QString& newDir);
 
   private slots:
     void slotRowHeightValueChanged(int);
@@ -71,5 +67,3 @@ class DlgPrefLibrary : public DlgPreferencePage, public Ui::DlgPrefLibraryDlg  {
     QFont m_originalTrackTableFont;
     int m_iOriginalTrackTableRowHeight;
 };
-
-#endif

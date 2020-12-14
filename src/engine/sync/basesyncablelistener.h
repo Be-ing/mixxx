@@ -1,5 +1,4 @@
-#ifndef BASESYNCABLELISTENER_H
-#define BASESYNCABLELISTENER_H
+#pragma once
 
 #include "engine/sync/syncable.h"
 #include "preferences/usersettings.h"
@@ -40,8 +39,9 @@ class BaseSyncableListener : public SyncableListener {
     // Syncable is set, then returns the beat distance of the internal clock.
     double masterBeatDistance() const;
 
-    // Returns the current BPM of the master Syncable if it were playing
-    // at 1.0 rate.
+    // Returns the overall average BPM of the master Syncable if it were playing
+    // at 1.0 rate. This is used to calculate half/double multipliers and whether
+    // the master has a bpm at all.
     double masterBaseBpm() const;
 
     // Set the BPM on every sync-enabled Syncable except pSource.
@@ -70,5 +70,3 @@ class BaseSyncableListener : public SyncableListener {
     // addSyncableDeck.
     QList<Syncable*> m_syncables;
 };
-
-#endif /* BASESYNCABLELISTENER_H */

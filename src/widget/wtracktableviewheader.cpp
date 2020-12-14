@@ -1,10 +1,9 @@
-// wtracktableviewheader.cpp
-// Created 1/2/2010 by RJ Ryan (rryan@mit.edu)
+#include "widget/wtracktableviewheader.h"
 
 #include <QtDebug>
 
-#include "widget/wtracktableviewheader.h"
 #include "library/trackmodel.h"
+#include "moc_wtracktableviewheader.cpp"
 #include "util/math.h"
 
 #define WTTVH_MINIMUM_SECTION_SIZE 20
@@ -38,13 +37,11 @@ HeaderViewState::HeaderViewState(const QHeaderView& headers)
 }
 
 HeaderViewState::HeaderViewState(const QString& base64serialized) {
-    QByteArray array;
-    array.append(base64serialized);
     // First decode the array from Base64, then initialize the protobuf from it.
-    array = QByteArray::fromBase64(array);
+    QByteArray array = QByteArray::fromBase64(base64serialized.toLatin1());
     if (!m_view_state.ParseFromArray(array.constData(), array.size())) {
-        qDebug() << "ERROR: Could not parse m_view_state from QByteArray of size "
-                 << array.size();
+        qWarning() << "Could not parse m_view_state from QByteArray of size "
+                   << array.size();
         return;
     }
 }
@@ -281,7 +278,7 @@ void WTrackTableViewHeader::showOrHideColumn(int column) {
 
 int WTrackTableViewHeader::hiddenCount() {
     int count = 0;
-    for (const auto& pAction : m_columnActions) {
+    for (const auto& pAction : qAsConst(m_columnActions)) {
         if (!pAction->isChecked()) {
             count += 1;
         }

@@ -1,19 +1,4 @@
-/***************************************************************************
-                      playerinfo.cpp  -  Helper class to have easy access
-                                         to a lot of data (singleton)
-                             -------------------
-    copyright            : (C) 2007 by Wesley Stessens
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+// Helper class to have easy access
 #include "mixer/playerinfo.h"
 
 #include <QMutexLocker>
@@ -22,6 +7,8 @@
 #include "engine/channels/enginechannel.h"
 #include "engine/enginexfader.h"
 #include "mixer/playermanager.h"
+#include "moc_playerinfo.cpp"
+#include "track/track.h"
 
 namespace {
 
@@ -42,9 +29,17 @@ PlayerInfo::~PlayerInfo() {
     clearControlCache();
 }
 
+PlayerInfo& PlayerInfo::create() {
+    VERIFY_OR_DEBUG_ASSERT(!s_pPlayerInfo) {
+        return *s_pPlayerInfo;
+    }
+    s_pPlayerInfo = new PlayerInfo();
+    return *s_pPlayerInfo;
+}
+
 // static
 PlayerInfo& PlayerInfo::instance() {
-    if (!s_pPlayerInfo) {
+    VERIFY_OR_DEBUG_ASSERT(s_pPlayerInfo) {
         s_pPlayerInfo = new PlayerInfo();
     }
     return *s_pPlayerInfo;
@@ -134,13 +129,13 @@ void PlayerInfo::updateCurrentPlayingDeck() {
             continue;
         }
 
-        double xfl, xfr;
+        CSAMPLE_GAIN xfl, xfr;
         // TODO: supply correct parameters to the function. If the hamster style
         // for the crossfader is enabled, the result is currently wrong.
         EngineXfader::getXfadeGains(m_pCOxfader->get(), 1.0, 0.0, MIXXX_XFADER_ADDITIVE, false,
                                     &xfl, &xfr);
 
-        int orient = pDc->m_orientation.get();
+        const auto orient = static_cast<int>(pDc->m_orientation.get());
         double xfvol;
         if (orient == EngineChannel::LEFT) {
             xfvol = xfl;

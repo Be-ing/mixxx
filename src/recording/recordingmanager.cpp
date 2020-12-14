@@ -1,12 +1,9 @@
-// Created 03/26/2011 by Tobias Rafreider
+#include "recording/recordingmanager.h"
 
-#include <QMutex>
 #include <QDir>
-#include <QtDebug>
-#include <QDebug>
 #include <QMessageBox>
+#include <QMutex>
 #include <QStorageInfo>
-
 #include <climits>
 
 #include "control/controlproxy.h"
@@ -15,11 +12,10 @@
 #include "engine/sidechain/enginerecord.h"
 #include "engine/sidechain/enginesidechain.h"
 #include "errordialoghandler.h"
+#include "moc_recordingmanager.cpp"
 #include "recording/defs_recording.h"
-#include "recording/recordingmanager.h"
 
-// one gibibyte
-#define MIN_DISK_FREE 1024 * 1024 * 1024ll
+#define MIN_DISK_FREE 1024 * 1024 * 1024ll // one gibibyte
 
 RecordingManager::RecordingManager(UserSettingsPointer pConfig, EngineMaster* pEngine)
         : m_pConfig(pConfig),
@@ -45,7 +41,6 @@ RecordingManager::RecordingManager(UserSettingsPointer pConfig, EngineMaster* pE
 
     m_split_size = getFileSplitSize();
     m_split_time = getFileSplitSeconds();
-
 
     // Register EngineRecord with the engine sidechain.
     EngineSideChain* pSidechain = pEngine->getSideChain();
@@ -74,7 +69,7 @@ RecordingManager::~RecordingManager() {
     delete m_pToggleRecording;
 }
 
-QString RecordingManager::formatDateTimeForFilename(QDateTime dateTime) const {
+QString RecordingManager::formatDateTimeForFilename(const QDateTime& dateTime) const {
     // Use a format based on ISO 8601. Windows does not support colons in
     // filenames so we can't use them anywhere.
     QString formatted = dateTime.toString("yyyy-MM-dd_hh'h'mm'm'ss's'");

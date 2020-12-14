@@ -1,10 +1,10 @@
 #include "library/columncache.h"
 
-#include "library/dao/trackschema.h"
 #include "library/dao/playlistdao.h"
+#include "library/dao/trackschema.h"
+#include "moc_columncache.cpp"
 
-
- ColumnCache::ColumnCache(const QStringList& columns) {
+ColumnCache::ColumnCache(const QStringList& columns) {
     m_pKeyNotationCP = new ControlProxy("[Library]", "key_notation", this);
     m_pKeyNotationCP->connectValueChanged(this, &ColumnCache::slotSetKeySortOrder);
 
@@ -66,6 +66,10 @@ void ColumnCache::setColumns(const QStringList& columns) {
     m_columnIndexByEnum[COLUMN_LIBRARYTABLE_COVERART_SOURCE] = fieldIndex(LIBRARYTABLE_COVERART_SOURCE);
     m_columnIndexByEnum[COLUMN_LIBRARYTABLE_COVERART_TYPE] = fieldIndex(LIBRARYTABLE_COVERART_TYPE);
     m_columnIndexByEnum[COLUMN_LIBRARYTABLE_COVERART_LOCATION] = fieldIndex(LIBRARYTABLE_COVERART_LOCATION);
+    m_columnIndexByEnum[COLUMN_LIBRARYTABLE_COVERART_COLOR] =
+            fieldIndex(LIBRARYTABLE_COVERART_COLOR);
+    m_columnIndexByEnum[COLUMN_LIBRARYTABLE_COVERART_DIGEST] =
+            fieldIndex(LIBRARYTABLE_COVERART_DIGEST);
     m_columnIndexByEnum[COLUMN_LIBRARYTABLE_COVERART_HASH] = fieldIndex(LIBRARYTABLE_COVERART_HASH);
 
     m_columnIndexByEnum[COLUMN_TRACKLOCATIONSTABLE_FSDELETED] = fieldIndex(TRACKLOCATIONSTABLE_FSDELETED);

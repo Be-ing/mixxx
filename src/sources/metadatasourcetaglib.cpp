@@ -75,8 +75,7 @@ class AiffFile : public TagLib::RIFF::AIFF::File {
     }
 };
 
-inline
-QDateTime getMetadataSynchronized(QFileInfo fileInfo) {
+inline QDateTime getMetadataSynchronized(const QFileInfo& fileInfo) {
     return fileInfo.lastModified();
 }
 
@@ -301,8 +300,7 @@ namespace {
 // and variants of this function in derived subclasses.
 class TagSaver {
   public:
-    virtual ~TagSaver() {
-    }
+    virtual ~TagSaver() = default;
 
     virtual bool hasModifiedTags() const = 0;
 
@@ -817,7 +815,7 @@ MetadataSourceTagLib::exportTrackMetadata(
         break;
     }
     default:
-        kLogger.warning()
+        kLogger.debug()
                 << "Cannot export track metadata"
                 << "into file" << m_fileName
                 << "with unknown or unsupported type"
