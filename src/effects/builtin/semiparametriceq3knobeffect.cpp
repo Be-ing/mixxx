@@ -1,31 +1,27 @@
 #include "effects/builtin/semiparametriceq3knobeffect.h"
 
-namespace {
-static const double kMinCorner = 13;    // Hz
-static const double kMaxCorner = 22050; // Hz
-static const double kLpfHpfQ = 0.1;
-static const double kSemiparametricQ = 0.4;
-static const double kSemiparametricMaxBoostDb = 8;
-static const double kSemiparametricMaxCutDb = -20;
-} // anonymous namespace
+#include "effects/builtin/semiparametriceqconstants.h"
 
 SemiparametricEQEffect3KnobGroupState::SemiparametricEQEffect3KnobGroupState(
         const mixxx::EngineParameters& bufferParameters)
         : EffectState(bufferParameters),
-          m_highFilter(
-                  bufferParameters.sampleRate(),
-                  kMinCorner / bufferParameters.sampleRate(),
-                  kLpfHpfQ,
+          m_highFilter(bufferParameters.sampleRate(),
+                  mixxx::semiparametriceqs::kMinCornerHz /
+                          bufferParameters.sampleRate(),
+                  mixxx::semiparametriceqs::kLpfHpfQ,
                   true),
-          m_semiParametricFilter(
-                  bufferParameters.sampleRate(), 1000, kSemiparametricQ),
-          m_lowFilter(
-                  bufferParameters.sampleRate(),
-                  kMaxCorner / bufferParameters.sampleRate(),
-                  kLpfHpfQ,
+          m_semiParametricFilter(bufferParameters.sampleRate(),
+                  1000,
+                  mixxx::semiparametriceqs::kSemiparametricQ),
+          m_lowFilter(bufferParameters.sampleRate(),
+                  mixxx::semiparametriceqs::kMaxCornerHz /
+                          bufferParameters.sampleRate(),
+                  mixxx::semiparametriceqs::kLpfHpfQ,
                   true),
           m_intermediateBuffer(bufferParameters.samplesPerBuffer()),
-          m_filterBehavior(kMinCorner, kMaxCorner, -40),
+          m_filterBehavior(mixxx::semiparametriceqs::kMinCornerHz,
+                  mixxx::semiparametriceqs::kMaxCornerHz,
+                  -40),
           m_dCenterOld(0),
           m_dGainOld(0),
           m_dFilterOld(0) {
@@ -112,12 +108,15 @@ void SemiparametricEQEffect3Knob::processChannel(const ChannelHandle& handle,
     if (center != pState->m_dCenterOld || gain != pState->m_dGainOld) {
         double db = gain - 1.0;
         if (db >= 0) {
-            db *= kSemiparametricMaxBoostDb;
+            db *= mixxx::semiparametriceqs::kSemiparametricMaxBoostDb;
         } else {
-            db *= -kSemiparametricMaxCutDb;
+            db *= -mixxx::semiparametriceqs::kSemiparametricMaxCutDb;
         }
         pState->m_semiParametricFilter.setFrequencyCorners(
-                bufferParameters.sampleRate(), center, kSemiparametricQ, db);
+                bufferParameters.sampleRate(),
+                center,
+                mixxx::semiparametriceqs::kSemiparametricQ,
+                db);
     }
     if (filter != pState->m_dFilterOld) {
         double lpf = pState->m_filterBehavior.parameterToValue(
@@ -126,8 +125,8 @@ void SemiparametricEQEffect3Knob::processChannel(const ChannelHandle& handle,
         double hpf = pState->m_filterBehavior.parameterToValue(
                              std::max((filter - 0.5) * 2.0, 0.0)) /
                 bufferParameters.sampleRate();
-        pState->m_lowFilter.setFrequencyCorners(1, lpf, kLpfHpfQ);
-        pState->m_highFilter.setFrequencyCorners(1, hpf, kLpfHpfQ);
+        pState->m_lowFilter.setFrequencyCorners(1, lpf, mixxx::semiparametriceqs::kLpfHpfQ);
+        pState->m_highFilter.setFrequencyCorners(1, hpf, mixxx::semiparametriceqs::kLpfHpfQ);
     }
 
     pState->m_lowFilter.process(

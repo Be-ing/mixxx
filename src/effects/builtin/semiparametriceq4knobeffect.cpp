@@ -1,28 +1,21 @@
 #include "effects/builtin/semiparametriceq4knobeffect.h"
 
-namespace {
-static const double kMinCorner = 13;    // Hz
-static const double kMaxCorner = 22050; // Hz
-static const double kLpfHpfQ = 0.707106781;
-static const double kSemiparametricQ = 0.4;
-static const double kSemiparametricMaxBoostDb = 8;
-static const double kSemiparametricMaxCutDb = -20;
-} // anonymous namespace
+#include "effects/builtin/semiparametriceqconstants.h"
 
 SemiparametricEQEffect4KnobGroupState::SemiparametricEQEffect4KnobGroupState(
         const mixxx::EngineParameters& bufferParameters)
         : EffectState(bufferParameters),
           m_highFilter(
                   bufferParameters.sampleRate(),
-                  kMinCorner / bufferParameters.sampleRate(),
-                  kLpfHpfQ,
+                  mixxx::semiparametriceqs::kMinCornerHz / bufferParameters.sampleRate(),
+                  mixxx::semiparametriceqs::kLpfHpfQ,
                   true),
           m_semiParametricFilter(
-                  bufferParameters.sampleRate(), 1000, kSemiparametricQ),
+                  bufferParameters.sampleRate(), 1000, mixxx::semiparametriceqs::kSemiparametricQ),
           m_lowFilter(
                   bufferParameters.sampleRate(),
-                  kMaxCorner / bufferParameters.sampleRate(),
-                  kLpfHpfQ,
+                  mixxx::semiparametriceqs::kMaxCornerHz / bufferParameters.sampleRate(),
+                  mixxx::semiparametriceqs::kLpfHpfQ,
                   true),
           m_intermediateBuffer(bufferParameters.samplesPerBuffer()),
           m_dHpfOld(0),
@@ -56,9 +49,9 @@ EffectManifestPointer SemiparametricEQEffect4Knob::getManifest() {
     hpf->setSemanticHint(EffectManifestParameter::SemanticHint::UNKNOWN);
     hpf->setUnitsHint(EffectManifestParameter::UnitsHint::UNKNOWN);
     hpf->setNeutralPointOnScale(0.0);
-    hpf->setDefault(kMaxCorner);
-    hpf->setMinimum(kMinCorner);
-    hpf->setMaximum(kMaxCorner);
+    hpf->setDefault(mixxx::semiparametriceqs::kMaxCornerHz);
+    hpf->setMinimum(mixxx::semiparametriceqs::kMinCornerHz);
+    hpf->setMaximum(mixxx::semiparametriceqs::kMaxCornerHz);
 
     EffectManifestParameterPointer gain = pManifest->addParameter();
     gain->setId("gain");
@@ -90,9 +83,9 @@ EffectManifestPointer SemiparametricEQEffect4Knob::getManifest() {
     lpf->setSemanticHint(EffectManifestParameter::SemanticHint::UNKNOWN);
     lpf->setUnitsHint(EffectManifestParameter::UnitsHint::UNKNOWN);
     lpf->setNeutralPointOnScale(1);
-    lpf->setMinimum(kMinCorner);
-    lpf->setMaximum(kMaxCorner);
-    lpf->setDefault(kMaxCorner);
+    lpf->setMinimum(mixxx::semiparametriceqs::kMinCornerHz);
+    lpf->setMaximum(mixxx::semiparametriceqs::kMaxCornerHz);
+    lpf->setDefault(mixxx::semiparametriceqs::kMaxCornerHz);
 
     return pManifest;
 }
@@ -123,18 +116,25 @@ void SemiparametricEQEffect4Knob::processChannel(const ChannelHandle& handle,
     if (center != pState->m_dCenterOld || gain != pState->m_dGainOld) {
         double db = gain - 1.0;
         if (db >= 0) {
-            db *= kSemiparametricMaxBoostDb;
+            db *= mixxx::semiparametriceqs::kSemiparametricMaxBoostDb;
         } else {
-            db *= -kSemiparametricMaxCutDb;
+            db *= -mixxx::semiparametriceqs::kSemiparametricMaxCutDb;
         }
         pState->m_semiParametricFilter.setFrequencyCorners(
-                bufferParameters.sampleRate(), center, kSemiparametricQ, db);
+                bufferParameters.sampleRate(),
+                center,
+                mixxx::semiparametriceqs::kSemiparametricQ,
+                db);
     }
     if (hpf != pState->m_dHpfOld) {
-        pState->m_lowFilter.setFrequencyCorners(bufferParameters.sampleRate(), hpf, kLpfHpfQ);
+        pState->m_lowFilter.setFrequencyCorners(bufferParameters.sampleRate(),
+                hpf,
+                mixxx::semiparametriceqs::kLpfHpfQ);
     }
     if (lpf != pState->m_dLpfOld) {
-        pState->m_lowFilter.setFrequencyCorners(bufferParameters.sampleRate(), lpf, kLpfHpfQ);
+        pState->m_lowFilter.setFrequencyCorners(bufferParameters.sampleRate(),
+                lpf,
+                mixxx::semiparametriceqs::kLpfHpfQ);
     }
 
     pState->m_highFilter.process(
