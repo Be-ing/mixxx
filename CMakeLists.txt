@@ -2207,9 +2207,9 @@ endif()
 
 # FFmpeg 4.x support
 # FFmpeg is multimedia library that can be found http://ffmpeg.org/
-find_package(FFMPEG COMPONENTS libavcodec libavformat libavutil libswresample)
 option(FFMPEG "FFmpeg 4.x support" OFF)
 if(FFMPEG)
+  find_package(FFMPEG COMPONENTS libavcodec libavformat libavutil libswresample)
   if(NOT FFMPEG_libavcodec_FOUND)
     message(FATAL_ERROR "FFmpeg support requires libavcodec and its development headers.")
   elseif(FFMPEG_libavcodec_VERSION VERSION_LESS 58)
