@@ -23,9 +23,10 @@ SemiparametricEQEffect4KnobGroupState::SemiparametricEQEffect4KnobGroupState(
           m_dGainOld(0),
           m_dLpfOld(0) {
 }
+
 // static
 QString SemiparametricEQEffect4Knob::getId() {
-    return "org.mixxx.effects.semiparametriceq4knob";
+    return QStringLiteral("org.mixxx.effects.semiparametriceq4knob");
 }
 
 EffectManifestPointer SemiparametricEQEffect4Knob::getManifest() {
@@ -33,8 +34,8 @@ EffectManifestPointer SemiparametricEQEffect4Knob::getManifest() {
     pManifest->setId(getId());
     pManifest->setName(QObject::tr("Semiparametric Equalizer (4 knobs)"));
     pManifest->setShortName(QObject::tr("Semiparam 4"));
-    pManifest->setAuthor("The Mixxx Team");
-    pManifest->setVersion("1.0");
+    pManifest->setAuthor(QStringLiteral("The Mixxx Team"));
+    pManifest->setVersion(QStringLiteral("1.0"));
     pManifest->setDescription(
             QObject::tr("A semiparametric EQ effect modeled after the "
                         "PLAYdifferently Model 1 hardware mixer."));
