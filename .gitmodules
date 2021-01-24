@@ -1,0 +1,4 @@
+[submodule "vcpkg"]
+	path = vcpkg
+	url = git@github.com:mixxxdj/vcpkg.git
+        branch = 2.3

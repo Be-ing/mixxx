@@ -13,10 +13,6 @@ IF NOT DEFINED CONFIGURATION (
     SET CONFIGURATION=release-fastbuild
 )
 
-IF NOT DEFINED BUILDENV_BASEPATH (
-    SET BUILDENV_BASEPATH=%MIXXX_ROOT%\buildenv
-)
-
 IF NOT DEFINED BUILD_ROOT (
     SET BUILD_ROOT=%MIXXX_ROOT%\build
 )
@@ -35,57 +31,36 @@ IF "%~1"=="" (
 
 EXIT /B 0
 
-:COMMAND_name
-    CALL :READ_ENVNAME
-    IF DEFINED GITHUB_ENV (
-        ECHO BUILDENV_NAME=!RETVAL! >> !GITHUB_ENV!
-    )
-    GOTO :EOF
-
 :COMMAND_setup
-    CALL :READ_ENVNAME
-    SET BUILDENV_NAME=%RETVAL%
-    SET BUILDENV_PATH=%BUILDENV_BASEPATH%\%BUILDENV_NAME%
+    set VCPKG_BINARY_SOURCES=clear;nuget,azure-artifacts,read
 
-    IF NOT EXIST %BUILDENV_BASEPATH% (
-        ECHO ### Create subdirectory buildenv ###
-        MD %BUILDENV_BASEPATH%
-    )
+    SET VCPKG_OVERLAY_PORTS=%MIXXX_ROOT%\vcpkg\overlay\ports
 
-    IF NOT EXIST %BUILDENV_PATH% (
-        ECHO ### Download prebuild build environment ###
-        SET BUILDENV_URL=https://downloads.mixxx.org/builds/buildserver/2.3.x-windows/!BUILDENV_NAME!.zip
-        IF NOT EXIST !BUILDENV_PATH!.zip (
-            ECHO ### Download prebuild build environment from !BUILDENV_URL! to !BUILDENV_PATH!.zip ###
-            BITSADMIN /transfer buildenvjob /download /priority normal !BUILDENV_URL! !BUILDENV_PATH!.zip
-            REM TODO: verify download using sha256sum?
-        )
-        ECHO ### Unpacking !BUILDENV_PATH!.zip ###
-        CALL :UNZIP "!BUILDENV_PATH!.zip" "!BUILDENV_BASEPATH!"
-        ECHO ### Unpacking complete. ###
-        DEL /f /q %BUILDENV_PATH%.zip
-    )
-
-    ECHO ### Build environment path: !BUILDENV_PATH! ###
-    ENDLOCAL
-
-    SET PATH=!BUILDENV_PATH!\bin;!PATH!
-
-    FOR /D %%G IN (%BUILDENV_PATH%\Qt-*) DO (SET Qt5_DIR=%%G)
-    SET CMAKE_PREFIX_PATH=!BUILDENV_PATH!;!Qt5_DIR!
-
-    ECHO ^Environent Variables:
-    ECHO ^- PATH=!PATH!
-    ECHO ^CMake Configuration:
-    ECHO ^- CMAKE_PREFIX_PATH=!CMAKE_PREFIX_PATH!
+    SET CMAKE_TOOLCHAIN_FILE="%MIXXX_ROOT%\vcpkg\scripts\buildsystems\vcpkg.cmake"
+    SET CMAKE_PREFIX_PATH=%MIXXX_ROOT%\build\vcpkg_installed\x64-windows
+    SET CMAKE_ARGS_EXTRA=-DCMAKE_TOOLCHAIN_FILE=!CMAKE_TOOLCHAIN_FILE! -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
 
     IF DEFINED GITHUB_ENV (
+        nuget sources add -name azure-artifacts -Source https://pkgs.dev.azure.com/mixxx/vcpkg/_packaging/dependencies/nuget/v3/index.json
+
+        ECHO VCPKG_BINARY_SOURCES=!VCPKG_BINARY_SOURCES!>>!GITHUB_ENV!
+        ECHO VCPKG_OVERLAY_PORTS=!VCPKG_OVERLAY_PORTS!>>!GITHUB_ENV!
         ECHO CMAKE_PREFIX_PATH=!CMAKE_PREFIX_PATH!>>!GITHUB_ENV!
+        ECHO CMAKE_ARGS_EXTRA=!CMAKE_ARGS_EXTRA!>>!GITHUB_ENV!
         ECHO PATH=!PATH!>>!GITHUB_ENV!
     ) else (
         CALL :GENERATE_CMakeSettings_JSON
         echo WARNING: CMakeSettings.json will include an invalid CMAKE_PREFIX_PATH
         echo          for settings other than %CONFIGURATION% .
+
+        IF NOT EXIST %MIXXX_ROOT%\windows_environment_variables.txt (
+            nuget sources add -name azure-artifacts -Source https://pkgs.dev.azure.com/mixxx/vcpkg/_packaging/dependencies/nuget/v3/index.json
+
+            ECHO VCPKG_BINARY_SOURCES=!VCPKG_BINARY_SOURCES!>>%MIXXX_ROOT%\windows_environment_variables.txt
+            ECHO VCPKG_OVERLAY_PORTS=!VCPKG_OVERLAY_PORTS!>>%MIXXX_ROOT%\windows_environment_variables.txt
+            ECHO CMAKE_PREFIX_PATH=!CMAKE_PREFIX_PATH!>>%MIXXX_ROOT%\windows_environment_variables.txt
+            ECHO CMAKE_ARGS_EXTRA=!CMAKE_ARGS_EXTRA!>>%MIXXX_ROOT%\windows_environment_variables.txt
+        )
 
         IF NOT EXIST %BUILD_ROOT% (
             ECHO ### Create subdirectory build ###
@@ -99,36 +74,8 @@ EXIT /B 0
     )
     GOTO :EOF
 
-
-:UNZIP <newzipfile> <ExtractTo>
-  SET vbs="%temp%\_.vbs"
-  IF EXIST %vbs% del /f /q %vbs%
-  >%vbs%  echo Set fso = CreateObject("Scripting.FileSystemObject")
-  >>%vbs% echo If NOT fso.FolderExists(%2) Then
-  >>%vbs% echo fso.CreateFolder(%2)
-  >>%vbs% echo End If
-  >>%vbs% echo Set objShell = CreateObject("Shell.Application")
-  >>%vbs% echo Set FilesInZip=objShell.NameSpace(%1).items
-  >>%vbs% echo objShell.NameSpace(%2).CopyHere(FilesInZip)
-  >>%vbs% echo Set fso = Nothing
-  >>%vbs% echo Set objShell = Nothing
-  cscript //nologo %vbs%
-  IF EXIST %vbs% DEL /f /q %vbs%
-  GOTO :EOF
-
-
 :REALPATH
     SET RETVAL=%~f1
-    GOTO :EOF
-
-
-:READ_ENVNAME
-    ECHO ### Read name of prebuild environment from: %MIXXX_ROOT%\packaging\windows\build_environment ###
-    SET /P BUILDENV_NAME=<%MIXXX_ROOT%\packaging\windows\build_environment
-    SET BUILDENV_NAME=!BUILDENV_NAME:PLATFORM=%PLATFORM%!
-    SET BUILDENV_NAME=!BUILDENV_NAME:CONFIGURATION=%CONFIGURATION%!
-    SET RETVAL=%BUILDENV_NAME%
-    ECHO "%RETVAL%"
     GOTO :EOF
 
 :GENERATE_CMakeSettings_JSON
@@ -192,7 +139,7 @@ REM Generate CMakeSettings.json which is read by MS Visual Studio to determine t
     CALL :AddCMakeVar2CMakeSettings_JSON "OPUS"                               "BOOL"   "True"
     CALL :AddCMakeVar2CMakeSettings_JSON "OPTIMIZE"                           "STRING" "%1"
     CALL :AddCMakeVar2CMakeSettings_JSON "QTKEYCHAIN"                         "BOOL"   "True"
-    CALL :AddCMakeVar2CMakeSettings_JSON "STATIC_DEPS"                        "BOOL"   "True"
+    CALL :AddCMakeVar2CMakeSettings_JSON "STATIC_DEPS"                        "BOOL"   "False"
     SET variableElementTermination=
     CALL :AddCMakeVar2CMakeSettings_JSON "VINYLCONTROL"                       "BOOL"   "True"
     >>%CMakeSettings% echo       ]
