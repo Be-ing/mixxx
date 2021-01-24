@@ -14,7 +14,7 @@ Imported Targets
 
 This module provides the following imported targets, if found:
 
-``Shout::Shout``
+``Shout::shout``
   The Shout library
 
 Result Variables
@@ -77,9 +77,9 @@ if(Shout_FOUND)
   set(Shout_DEFINITIONS ${PC_Shout_CFLAGS_OTHER})
   set(Shout_VERSION ${PC_Shout_VERSION})
 
-  if(NOT TARGET Shout::Shout)
-    add_library(Shout::Shout UNKNOWN IMPORTED)
-    set_target_properties(Shout::Shout
+  if(NOT TARGET Shout::shout)
+    add_library(Shout::shout UNKNOWN IMPORTED)
+    set_target_properties(Shout::shout
       PROPERTIES
         IMPORTED_LOCATION "${Shout_LIBRARY}"
         INTERFACE_COMPILE_OPTIONS "${PC_Shout_CFLAGS_OTHER}"
