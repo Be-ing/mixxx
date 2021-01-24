@@ -73,6 +73,7 @@ jobs:
               -DMAD=ON
               -DMEDIAFOUNDATION=ON
               -DFFMPEG=OFF
+              -DBROADCAST=OFF
             cc: cl
             cxx: cl
             cmake_generator: Ninja
@@ -216,7 +217,6 @@ jobs:
         -DDEBUG_ASSERTIONS_FATAL=ON
         -DQt5_DIR=${{ env.QT_PATH }} ${{ matrix.cmake_args }} ${{ env.CMAKE_ARGS_EXTRA }}
         -DBATTERY=ON
-        -DBROADCAST=ON
         -DBULK=ON
         -DHID=ON
         -DLILV=ON
