@@ -82,6 +82,7 @@ jobs:
             cpack_generator: WIX
             compiler_cache: clcache
             compiler_cache_path: ${{ github.workspace }}\clcache
+            vcpkg_downloads_path: D:\vcpkg_downloads
             vcpkg_executable: vcpkg.exe
             vcpkg_triplet: x64-windows
             buildenv_script: tools/windows_buildenv.bat
@@ -228,6 +229,7 @@ jobs:
       env:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
+        VCPKG_DOWNLOADS: ${{ matrix.vcpkg_downloads_path }}
 
     - name: "[Ubuntu/macOS] Set up gcc/clang problem matcher"
       if: runner.os != 'Windows'
