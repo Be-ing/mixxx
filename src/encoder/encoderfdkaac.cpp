@@ -1,8 +1,5 @@
 #include "encoder/encoderfdkaac.h"
 
-#ifdef __APPLE__
-#include <QCoreApplication>
-#endif
 #include <QDir>
 #include <QStandardPaths>
 #include <QString>
@@ -20,17 +17,11 @@ const mixxx::Logger kLogger("EncoderFdkAac");
 } // namespace
 
 EncoderFdkAac::EncoderFdkAac(EncoderCallback* pCallback)
-        : aacEncOpen(nullptr),
-          aacEncClose(nullptr),
-          aacEncEncode(nullptr),
-          aacEncInfo(nullptr),
-          aacEncoder_SetParam(nullptr),
-          m_aacAot(AOT_AAC_LC),
+        : m_aacAot(AOT_AAC_LC),
           m_bitrate(0),
           m_channels(0),
           m_samplerate(0),
           m_pCallback(pCallback),
-          m_pLibrary(nullptr),
           m_pInputFifo(nullptr),
           m_pFifoChunkBuffer(nullptr),
           m_readRequired(0),
@@ -38,99 +29,6 @@ EncoderFdkAac::EncoderFdkAac(EncoderCallback* pCallback)
           m_pAacDataBuffer(nullptr),
           m_aacInfo(),
           m_hasSbr(false) {
-    // Load the shared library
-    //
-    // Libraries from external sources take priority because they may include HE-AAC support,
-    // but we do not risk shipping that with Mixxx because of patents and GPL compatibility.
-    //
-    // From https://bugzilla.redhat.com/show_bug.cgi?id=1501522#c112 :
-    // The Fedora Project is aware that the Free Software Foundation
-    // has stated that the Fraunhofer FDK AAC license is GPL
-    // incompatible, specifically, because of Clause 3.
-    //
-    // We believe that the fdk-aac software codec implementation that we
-    // wish to include in Fedora [which is shipped with Mixxx on Windows and macOS]
-    // is no longer encumbered by AAC patents.
-    // This fact means that Clause 3 in the FDK AAC license is a "no op",
-    // or to put it plainly, if no patents are in play, there are no
-    // patent licenses to disclaim. For this (and only this) specific
-    // implementation of fdk-aac, we believe that the FDK AAC license is
-    // GPL compatible.
-    QStringList libnames;
-#if __WINDOWS__
-    // Search for library from B.U.T.T.
-    QString buttFdkAacPath = buttWindowsFdkAac();
-    if (!buttFdkAacPath.isEmpty()) {
-        kLogger.debug() << "Found libfdk-aac at" << buttFdkAacPath;
-        libnames << buttFdkAacPath;
-    }
-#elif __APPLE__
-    // Homebrew
-    libnames << QStringLiteral("/usr/local/lib/libfdk-aac");
-    // MacPorts
-    libnames << QStringLiteral("/opt/local/lib/libfdk-aac");
-
-    // Mixxx application bundle
-    QFileInfo bundlePath(QCoreApplication::applicationDirPath() +
-            QStringLiteral("/../Frameworks/libfdk-aac"));
-    libnames << bundlePath.absoluteFilePath();
-#endif
-    libnames << QStringLiteral("fdk-aac");
-
-    QString failedMsg = QStringLiteral("Failed to load AAC encoder library");
-    for (const auto& libname : qAsConst(libnames)) {
-        m_pLibrary = std::make_unique<QLibrary>(libname, 2);
-        if (m_pLibrary->load()) {
-            kLogger.debug() << "Successfully loaded encoder library" << m_pLibrary->fileName();
-            break;
-        }
-        // The APIs this class uses did not change between library versions 1 and 2.
-        // Ubuntu 20.04 LTS has version 1.
-        m_pLibrary = std::make_unique<QLibrary>(libname, 1);
-        if (m_pLibrary->load()) {
-            kLogger.debug() << "Successfully loaded encoder library" << m_pLibrary->fileName();
-            break;
-        }
-        // collect error messages for the case we have no success
-        failedMsg.append("\n" + m_pLibrary->errorString());
-        m_pLibrary = nullptr;
-    }
-
-    if (!m_pLibrary || !m_pLibrary->isLoaded()) {
-        kLogger.warning() << failedMsg;
-        return;
-    }
-
-    aacEncGetLibInfo = (aacEncGetLibInfo_)m_pLibrary->resolve("aacEncGetLibInfo");
-    aacEncOpen = (aacEncOpen_)m_pLibrary->resolve("aacEncOpen");
-    aacEncClose = (aacEncClose_)m_pLibrary->resolve("aacEncClose");
-    aacEncEncode = (aacEncEncode_)m_pLibrary->resolve("aacEncEncode");
-    aacEncInfo = (aacEncInfo_)m_pLibrary->resolve("aacEncInfo");
-    aacEncoder_SetParam = (aacEncoder_SetParam_)m_pLibrary->resolve("aacEncoder_SetParam");
-
-    // Check if all function pointers aren't null.
-    // Otherwise, the version of libfdk-aac loaded doesn't comply with the official distribution
-    if (!aacEncGetLibInfo ||
-            !aacEncOpen ||
-            !aacEncClose ||
-            !aacEncEncode ||
-            !aacEncInfo ||
-            !aacEncoder_SetParam) {
-        m_pLibrary->unload();
-        m_pLibrary = nullptr;
-
-        failedMsg.append(", the interface is not as expected");
-        kLogger.warning() << failedMsg;
-
-        kLogger.debug() << "aacEncGetLibInfo:" << aacEncGetLibInfo;
-        kLogger.debug() << "aacEncOpen:" << aacEncOpen;
-        kLogger.debug() << "aacEncClose:" << aacEncClose;
-        kLogger.debug() << "aacEncEncode:" << aacEncEncode;
-        kLogger.debug() << "aacEncInfo:" << aacEncInfo;
-        kLogger.debug() << "aacEncoder_SetParam:" << aacEncoder_SetParam;
-        return;
-    }
-
     LIB_INFO libinfo[FDK_MODULE_LAST] = {};
     aacEncGetLibInfo(libinfo);
     for (const auto& li : libinfo) {
@@ -145,68 +43,9 @@ EncoderFdkAac::EncoderFdkAac(EncoderCallback* pCallback)
 }
 
 EncoderFdkAac::~EncoderFdkAac() {
-    if (m_pLibrary && m_pLibrary->isLoaded()) {
-        aacEncClose(&m_aacEnc);
-
-        flush();
-        m_pLibrary->unload();
-        kLogger.debug() << "Unloaded libfdk-aac";
-    }
-
     delete[] m_pAacDataBuffer;
     delete m_pFifoChunkBuffer;
     delete m_pInputFifo;
-}
-
-QString EncoderFdkAac::buttWindowsFdkAac() {
-    // Return %APPDATA%/Local path
-    QString appData = QStandardPaths::writableLocation(
-            QStandardPaths::AppLocalDataLocation);
-    appData = QFileInfo(appData).absolutePath() + "/..";
-
-    // Candidate paths for a butt installation
-    QStringList searchPaths;
-    searchPaths << "C:/Program Files";
-    searchPaths << "C:/Program Files (x86)";
-    searchPaths << appData;
-
-    // Try to find a butt installation in one of the
-    // potential paths above
-    for (const auto& topPath : qAsConst(searchPaths)) {
-        QDir folder(topPath);
-        if (!folder.exists()) {
-            continue;
-        }
-
-        // Typical name for a butt installation folder
-        // is "butt-x.x.x" so list subfolders beginning with "butt"
-        QStringList nameFilters("butt*");
-        QStringList subfolders =
-                folder.entryList(nameFilters, QDir::Dirs, QDir::Name);
-
-        // If a butt installation is found, try
-        // to find libfdk-aac in it
-        for (const auto& subName : qAsConst(subfolders)) {
-            if (!folder.cd(subName)) {
-                continue;
-            }
-
-            kLogger.debug()
-                    << "Found potential B.U.T.T installation at"
-                    << (topPath + "/" + subName);
-
-            QString libFile = "libfdk-aac-2.dll";
-            if (folder.exists(libFile)) {
-                // Found a libfdk-aac here.
-                // Return the full path of the .dll file.
-                return folder.absoluteFilePath(libFile);
-            }
-
-            folder.cdUp();
-        }
-    }
-
-    return QString();
 }
 
 void EncoderFdkAac::setEncoderSettings(const EncoderSettings& settings) {
@@ -242,21 +81,6 @@ void EncoderFdkAac::setEncoderSettings(const EncoderSettings& settings) {
 
 int EncoderFdkAac::initEncoder(int samplerate, QString* pUserErrorMessage) {
     m_samplerate = samplerate;
-
-    if (!m_pLibrary) {
-        kLogger.warning() << "initEncoder failed: fdk-aac library not loaded";
-        if (pUserErrorMessage) {
-            // TODO(Palakis): write installation guide on Mixxx's wiki
-            // and include link in message below
-            *pUserErrorMessage = QObject::tr(
-                    "<html>Mixxx cannot record or stream in AAC "
-                    "or HE-AAC without the FDK-AAC encoder. "
-                    "In order to record or stream in AAC or AAC+, you need to "
-                    "download <b>libfdk-aac</b> "
-                    "and install it on your system.");
-        }
-        return -1;
-    }
 
     if ((m_aacAot & AOT_SBR) == AOT_SBR && !m_hasSbr) {
         kLogger.warning() << "initEncoder failed: fdk-aac library has no HE-AAC support";

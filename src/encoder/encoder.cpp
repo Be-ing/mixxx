@@ -28,8 +28,10 @@
 #include "encoder/encoderopussettings.h"
 #endif
 
+#ifdef __FDKAAC__
 #include "encoder/encoderfdkaac.h"
 #include "encoder/encoderfdkaacsettings.h"
+#endif
 
 EncoderFactory EncoderFactory::factory;
 
@@ -48,9 +50,11 @@ EncoderFactory::EncoderFactory() {
 #ifdef __OPUS__
     m_formats.append(Encoder::Format("Opus", ENCODING_OPUS, false, "opus"));
 #endif
+#ifdef __FDKAAC__
     m_formats.append(Encoder::Format("AAC", ENCODING_AAC, false, "aac"));
     m_formats.append(Encoder::Format("HE-AAC", ENCODING_HEAAC, false, "aac"));
     m_formats.append(Encoder::Format("HE-AACv2", ENCODING_HEAACV2, false, "aac"));
+#endif
 }
 
 const QList<Encoder::Format> EncoderFactory::getFormats() const
@@ -114,12 +118,14 @@ EncoderPointer EncoderFactory::createEncoder(
         pEncoder = std::make_shared<EncoderOpus>(pCallback);
         pEncoder->setEncoderSettings(*pSettings);
 #endif
+#ifdef __FDKAAC__
     } else if (pSettings &&
             (pSettings->getFormat() == ENCODING_AAC ||
                     pSettings->getFormat() == ENCODING_HEAAC ||
                     pSettings->getFormat() == ENCODING_HEAACV2)) {
         pEncoder = std::make_shared<EncoderFdkAac>(pCallback);
         pEncoder->setEncoderSettings(*pSettings);
+#endif
     } else {
         qWarning() << "Unsupported format requested! "
                 << QString(pSettings ? pSettings->getFormat() : QString("NULL"));
@@ -145,10 +151,12 @@ EncoderRecordingSettingsPointer EncoderFactory::getEncoderRecordingSettings(Enco
     } else if (format.internalName == ENCODING_OPUS) {
         return std::make_shared<EncoderOpusSettings>(pConfig);
 #endif
+#ifdef __FDKAAC__
     } else if (format.internalName == ENCODING_AAC ||
             format.internalName == ENCODING_HEAAC ||
             format.internalName == ENCODING_HEAACV2) {
         return std::make_shared<EncoderFdkAacSettings>(pConfig, format.internalName);
+#endif
     } else {
         qWarning() << "Unsupported format requested! " << format.internalName;
         DEBUG_ASSERT(false);
