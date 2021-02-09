@@ -55,7 +55,7 @@ EXIT /B 0
 
     IF NOT EXIST %BUILDENV_PATH% (
         ECHO ### Download prebuild build environment ###
-        SET BUILDENV_URL=https://downloads.mixxx.org/dependencies/2.3/Windows/!BUILDENV_NAME!.zip
+        SET BUILDENV_URL=https://downloads.mixxx.org/dependencies/libsndfile_regression/Windows/!BUILDENV_NAME!.zip
         IF NOT EXIST !BUILDENV_PATH!.zip (
             ECHO ### Download prebuild build environment from !BUILDENV_URL! to !BUILDENV_PATH!.zip ###
             BITSADMIN /transfer buildenvjob /download /priority normal !BUILDENV_URL! !BUILDENV_PATH!.zip
