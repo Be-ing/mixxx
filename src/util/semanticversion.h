@@ -18,6 +18,16 @@ class SemanticVersion {
     unsigned int majorVersion, minorVersion, patchVersion;
 };
 
+inline bool operator==(const SemanticVersion& a, const SemanticVersion& b) {
+    return a.majorVersion == b.majorVersion &&
+            a.minorVersion == b.minorVersion &&
+            a.patchVersion == b.patchVersion;
+}
+
+inline bool operator!=(const SemanticVersion& a, const SemanticVersion& b) {
+    return !(a == b);
+}
+
 inline bool operator<(const SemanticVersion& a, const SemanticVersion& b) {
     return std::tie(a.majorVersion, a.minorVersion, a.patchVersion) <
             std::tie(b.majorVersion, b.minorVersion, b.patchVersion);
