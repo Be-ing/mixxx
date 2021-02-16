@@ -32,7 +32,7 @@ QStringList getSupportedFileExtensionsFiltered() {
     QString libsndfileVersion = sf_version_string();
     int separatorIndex = libsndfileVersion.lastIndexOf("-");
     auto semver = mixxx::SemanticVersion(libsndfileVersion.right(separatorIndex));
-    if (semver >= kVersionStringWithBrokenOggDecoding) {
+    if (semver == kVersionStringWithBrokenOggDecoding) {
         kLogger.info()
                 << "Disabling OGG decoding for"
                 << libsndfileVersion;
