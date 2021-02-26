@@ -144,10 +144,6 @@ if(MSVC)
       # Remove /RTC1 flag set by CMAKE by default (conflicts with /O2)
       string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG}")
       string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG  "${CMAKE_C_FLAGS_DEBUG}")
-    else()
-      # Squeeze binary in Release builds
-      add_link_options(/OPT:REF)
-      # Note: CMAKE_INTERPROCEDURAL_OPTIMIZATION sets the /GL and /LTCG flags for us
     endif()
 
     if(OPTIMIZE STREQUAL "portable")
