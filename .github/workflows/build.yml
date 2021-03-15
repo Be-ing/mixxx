@@ -121,7 +121,7 @@ jobs:
     # by causing it to find link.exe from Git for Windows instead of MSVC.
     - name: "[Windows] Build fixed sccache"
       if: runner.os == 'Windows' && steps.sccache-build-cache.outputs.cache-hit != 'true'
-      run: cargo install --path .
+      run: cargo install --git https://github.com/mozilla/sccache.git --branch master
 
     - name: "Set up cmake"
       uses: jwlawson/actions-setup-cmake@v1.4
