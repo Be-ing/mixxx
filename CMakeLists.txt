@@ -397,6 +397,13 @@ endif()
 
 set(CLANG_TIDY "" CACHE STRING "CMAKE_CXX_CLANG_TIDY equivalent that only applies to mixxx sources, not bundled dependencies")
 
+option(QT6 "Build with Qt6" OFF)
+if(QT6)
+  find_package(QT NAMES Qt6 COMPONENTS Core REQUIRED)
+else()
+  find_package(QT NAMES Qt5 COMPONENTS Core REQUIRED)
+endif()
+
 # Mixxx itself
 add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/analyzer/analyzerbeats.cpp
@@ -760,14 +767,6 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/preferences/settingsmanager.cpp
   src/preferences/upgrade.cpp
   src/recording/recordingmanager.cpp
-  src/skin/legacy/colorschemeparser.cpp
-  src/skin/legacy/imgcolor.cpp
-  src/skin/legacy/imginvert.cpp
-  src/skin/legacy/imgloader.cpp
-  src/skin/legacy/launchimage.cpp
-  src/skin/legacy/legacyskinparser.cpp
-  src/skin/legacy/pixmapsource.cpp
-  src/skin/legacy/legacyskin.cpp
   src/skin/qml/asyncimageprovider.cpp
   src/skin/qml/qmlcontrolproxy.cpp
   src/skin/qml/qmlconfigproxy.cpp
@@ -892,125 +891,137 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/util/workerthread.cpp
   src/util/workerthreadscheduler.cpp
   src/util/xml.cpp
-  src/waveform/guitick.cpp
-  src/waveform/renderers/glslwaveformrenderersignal.cpp
-  src/waveform/renderers/glvsynctestrenderer.cpp
-  src/waveform/renderers/glwaveformrendererfilteredsignal.cpp
-  src/waveform/renderers/glwaveformrendererrgb.cpp
-  src/waveform/renderers/glwaveformrenderersimplesignal.cpp
-  src/waveform/renderers/qtvsynctestrenderer.cpp
-  src/waveform/renderers/qtwaveformrendererfilteredsignal.cpp
-  src/waveform/renderers/qtwaveformrenderersimplesignal.cpp
-  src/waveform/renderers/waveformmark.cpp
-  src/waveform/renderers/waveformmarkrange.cpp
-  src/waveform/renderers/waveformmarkset.cpp
-  src/waveform/renderers/waveformrenderbackground.cpp
-  src/waveform/renderers/waveformrenderbeat.cpp
-  src/waveform/renderers/waveformrendererabstract.cpp
-  src/waveform/renderers/waveformrendererendoftrack.cpp
-  src/waveform/renderers/waveformrendererfilteredsignal.cpp
-  src/waveform/renderers/waveformrendererhsv.cpp
-  src/waveform/renderers/waveformrendererpreroll.cpp
-  src/waveform/renderers/waveformrendererrgb.cpp
-  src/waveform/renderers/waveformrenderersignalbase.cpp
-  src/waveform/renderers/waveformrendermark.cpp
-  src/waveform/renderers/waveformrendermarkrange.cpp
-  src/waveform/renderers/waveformsignalcolors.cpp
-  src/waveform/renderers/waveformwidgetrenderer.cpp
-  src/waveform/sharedglcontext.cpp
-  src/waveform/visualplayposition.cpp
-  src/waveform/visualsmanager.cpp
-  src/waveform/vsyncthread.cpp
-  src/waveform/waveform.cpp
-  src/waveform/waveformfactory.cpp
-  src/waveform/waveformmarklabel.cpp
-  src/waveform/waveformwidgetfactory.cpp
-  src/waveform/widgets/emptywaveformwidget.cpp
-  src/waveform/widgets/glrgbwaveformwidget.cpp
-  src/waveform/widgets/glsimplewaveformwidget.cpp
-  src/waveform/widgets/glslwaveformwidget.cpp
-  src/waveform/widgets/glvsynctestwidget.cpp
-  src/waveform/widgets/glwaveformwidget.cpp
-  src/waveform/widgets/hsvwaveformwidget.cpp
-  src/waveform/widgets/qthsvwaveformwidget.cpp
-  src/waveform/widgets/qtrgbwaveformwidget.cpp
-  src/waveform/widgets/qtsimplewaveformwidget.cpp
-  src/waveform/widgets/qtvsynctestwidget.cpp
-  src/waveform/widgets/qtwaveformwidget.cpp
-  src/waveform/widgets/rgbwaveformwidget.cpp
-  src/waveform/widgets/softwarewaveformwidget.cpp
-  src/waveform/widgets/waveformwidgetabstract.cpp
-  src/widget/controlwidgetconnection.cpp
-  src/widget/hexspinbox.cpp
-  src/widget/paintable.cpp
-  src/widget/wanalysislibrarytableview.cpp
-  src/widget/wbasewidget.cpp
-  src/widget/wbattery.cpp
-  src/widget/wbeatspinbox.cpp
-  src/widget/wcolorpicker.cpp
-  src/widget/wcolorpickeraction.cpp
-  src/widget/wcombobox.cpp
-  src/widget/wcoverart.cpp
-  src/widget/wcoverartlabel.cpp
-  src/widget/wcoverartmenu.cpp
-  src/widget/wcuemenupopup.cpp
-  src/widget/wdisplay.cpp
-  src/widget/weffect.cpp
-  src/widget/weffectbuttonparameter.cpp
-  src/widget/weffectchain.cpp
-  src/widget/weffectparameter.cpp
-  src/widget/weffectparameterbase.cpp
-  src/widget/weffectparameterknob.cpp
-  src/widget/weffectparameterknobcomposed.cpp
-  src/widget/weffectpushbutton.cpp
-  src/widget/weffectselector.cpp
-  src/widget/whotcuebutton.cpp
-  src/widget/wimagestore.cpp
-  src/widget/wkey.cpp
-  src/widget/wknob.cpp
-  src/widget/wknobcomposed.cpp
-  src/widget/wlabel.cpp
-  src/widget/wlibrary.cpp
-  src/widget/wlibrarysidebar.cpp
-  src/widget/wlibrarytableview.cpp
-  src/widget/wlibrarytextbrowser.cpp
-  src/widget/wmainmenubar.cpp
-  src/widget/wnumber.cpp
-  src/widget/wnumberdb.cpp
-  src/widget/wnumberpos.cpp
-  src/widget/wnumberrate.cpp
-  src/widget/woverview.cpp
-  src/widget/woverviewhsv.cpp
-  src/widget/woverviewlmh.cpp
-  src/widget/woverviewrgb.cpp
-  src/widget/wpixmapstore.cpp
-  src/widget/wpushbutton.cpp
-  src/widget/wrecordingduration.cpp
-  src/widget/wscrollable.cpp
-  src/widget/wsearchlineedit.cpp
-  src/widget/wsearchrelatedtracksmenu.cpp
-  src/widget/wsingletoncontainer.cpp
-  src/widget/wsizeawarestack.cpp
-  src/widget/wskincolor.cpp
-  src/widget/wslidercomposed.cpp
-  src/widget/wspinny.cpp
-  src/widget/wsplitter.cpp
-  src/widget/wstarrating.cpp
-  src/widget/wstatuslight.cpp
-  src/widget/wtime.cpp
-  src/widget/wtrackmenu.cpp
-  src/widget/wtrackproperty.cpp
-  src/widget/wtracktableview.cpp
-  src/widget/wtracktableviewheader.cpp
-  src/widget/wtracktext.cpp
-  src/widget/wtrackwidgetgroup.cpp
-  src/widget/wvumeter.cpp
-  src/widget/wwaveformviewer.cpp
-  src/widget/wwidget.cpp
-  src/widget/wwidgetgroup.cpp
-  src/widget/wwidgetstack.cpp
-  src/widget/wraterange.cpp
 )
+if(NOT QT6)
+  target_sources(mixxx-lib PRIVATE
+    src/skin/legacy/colorschemeparser.cpp
+    src/skin/legacy/imgcolor.cpp
+    src/skin/legacy/imginvert.cpp
+    src/skin/legacy/imgloader.cpp
+    src/skin/legacy/launchimage.cpp
+    src/skin/legacy/legacyskinparser.cpp
+    src/skin/legacy/pixmapsource.cpp
+    src/skin/legacy/legacyskin.cpp
+    src/waveform/guitick.cpp
+    src/waveform/renderers/glslwaveformrenderersignal.cpp
+    src/waveform/renderers/glvsynctestrenderer.cpp
+    src/waveform/renderers/glwaveformrendererfilteredsignal.cpp
+    src/waveform/renderers/glwaveformrendererrgb.cpp
+    src/waveform/renderers/glwaveformrenderersimplesignal.cpp
+    src/waveform/renderers/qtvsynctestrenderer.cpp
+    src/waveform/renderers/qtwaveformrendererfilteredsignal.cpp
+    src/waveform/renderers/qtwaveformrenderersimplesignal.cpp
+    src/waveform/renderers/waveformmark.cpp
+    src/waveform/renderers/waveformmarkrange.cpp
+    src/waveform/renderers/waveformmarkset.cpp
+    src/waveform/renderers/waveformrenderbackground.cpp
+    src/waveform/renderers/waveformrenderbeat.cpp
+    src/waveform/renderers/waveformrendererabstract.cpp
+    src/waveform/renderers/waveformrendererendoftrack.cpp
+    src/waveform/renderers/waveformrendererfilteredsignal.cpp
+    src/waveform/renderers/waveformrendererhsv.cpp
+    src/waveform/renderers/waveformrendererpreroll.cpp
+    src/waveform/renderers/waveformrendererrgb.cpp
+    src/waveform/renderers/waveformrenderersignalbase.cpp
+    src/waveform/renderers/waveformrendermark.cpp
+    src/waveform/renderers/waveformrendermarkrange.cpp
+    src/waveform/renderers/waveformsignalcolors.cpp
+    src/waveform/renderers/waveformwidgetrenderer.cpp
+    src/waveform/sharedglcontext.cpp
+    src/waveform/visualplayposition.cpp
+    src/waveform/visualsmanager.cpp
+    src/waveform/vsyncthread.cpp
+    src/waveform/waveform.cpp
+    src/waveform/waveformfactory.cpp
+    src/waveform/waveformmarklabel.cpp
+    src/waveform/waveformwidgetfactory.cpp
+    src/waveform/widgets/emptywaveformwidget.cpp
+    src/waveform/widgets/glrgbwaveformwidget.cpp
+    src/waveform/widgets/glsimplewaveformwidget.cpp
+    src/waveform/widgets/glslwaveformwidget.cpp
+    src/waveform/widgets/glvsynctestwidget.cpp
+    src/waveform/widgets/glwaveformwidget.cpp
+    src/waveform/widgets/hsvwaveformwidget.cpp
+    src/waveform/widgets/qthsvwaveformwidget.cpp
+    src/waveform/widgets/qtrgbwaveformwidget.cpp
+    src/waveform/widgets/qtsimplewaveformwidget.cpp
+    src/waveform/widgets/qtvsynctestwidget.cpp
+    src/waveform/widgets/qtwaveformwidget.cpp
+    src/waveform/widgets/rgbwaveformwidget.cpp
+    src/waveform/widgets/softwarewaveformwidget.cpp
+    src/waveform/widgets/waveformwidgetabstract.cpp
+    src/widget/controlwidgetconnection.cpp
+    src/widget/hexspinbox.cpp
+    src/widget/paintable.cpp
+    src/widget/wanalysislibrarytableview.cpp
+    src/widget/wbasewidget.cpp
+    src/widget/wbattery.cpp
+    src/widget/wbeatspinbox.cpp
+    src/widget/wcolorpicker.cpp
+    src/widget/wcolorpickeraction.cpp
+    src/widget/wcombobox.cpp
+    src/widget/wcoverart.cpp
+    src/widget/wcoverartlabel.cpp
+    src/widget/wcoverartmenu.cpp
+    src/widget/wcuemenupopup.cpp
+    src/widget/wdisplay.cpp
+    src/widget/weffect.cpp
+    src/widget/weffectbuttonparameter.cpp
+    src/widget/weffectchain.cpp
+    src/widget/weffectparameter.cpp
+    src/widget/weffectparameterbase.cpp
+    src/widget/weffectparameterknob.cpp
+    src/widget/weffectparameterknobcomposed.cpp
+    src/widget/weffectpushbutton.cpp
+    src/widget/weffectselector.cpp
+    src/widget/whotcuebutton.cpp
+    src/widget/wimagestore.cpp
+    src/widget/wkey.cpp
+    src/widget/wknob.cpp
+    src/widget/wknobcomposed.cpp
+    src/widget/wlabel.cpp
+    src/widget/wlibrary.cpp
+    src/widget/wlibrarysidebar.cpp
+    src/widget/wlibrarytableview.cpp
+    src/widget/wlibrarytextbrowser.cpp
+    src/widget/wmainmenubar.cpp
+    src/widget/wnumber.cpp
+    src/widget/wnumberdb.cpp
+    src/widget/wnumberpos.cpp
+    src/widget/wnumberrate.cpp
+    src/widget/woverview.cpp
+    src/widget/woverviewhsv.cpp
+    src/widget/woverviewlmh.cpp
+    src/widget/woverviewrgb.cpp
+    src/widget/wpixmapstore.cpp
+    src/widget/wpushbutton.cpp
+    src/widget/wrecordingduration.cpp
+    src/widget/wscrollable.cpp
+    src/widget/wsearchlineedit.cpp
+    src/widget/wsearchrelatedtracksmenu.cpp
+    src/widget/wsingletoncontainer.cpp
+    src/widget/wsizeawarestack.cpp
+    src/widget/wskincolor.cpp
+    src/widget/wslidercomposed.cpp
+    src/widget/wspinny.cpp
+    src/widget/wsplitter.cpp
+    src/widget/wstarrating.cpp
+    src/widget/wstatuslight.cpp
+    src/widget/wtime.cpp
+    src/widget/wtrackmenu.cpp
+    src/widget/wtrackproperty.cpp
+    src/widget/wtracktableview.cpp
+    src/widget/wtracktableviewheader.cpp
+    src/widget/wtracktext.cpp
+    src/widget/wtrackwidgetgroup.cpp
+    src/widget/wvumeter.cpp
+    src/widget/wwaveformviewer.cpp
+    src/widget/wwidget.cpp
+    src/widget/wwidgetgroup.cpp
+    src/widget/wwidgetstack.cpp
+    src/widget/wraterange.cpp
+  )
+endif()
 set_target_properties(mixxx-lib PROPERTIES AUTOMOC ON AUTOUIC ON CXX_CLANG_TIDY "${CLANG_TIDY}")
 target_include_directories(mixxx-lib PUBLIC src "${CMAKE_CURRENT_BINARY_DIR}/src")
 if(UNIX AND NOT APPLE)
@@ -2024,7 +2035,7 @@ target_link_libraries(mixxx-lib PRIVATE mixxx-proto)
 target_include_directories(mixxx-lib SYSTEM PUBLIC lib/rigtorp/SPSCQueue/include)
 
 # Qt
-find_package(Qt5
+find_package(Qt${QT_VERSION_MAJOR}
   COMPONENTS
     Concurrent
     Core
@@ -2055,12 +2066,14 @@ target_link_libraries(mixxx-lib PUBLIC
   Qt${QT_VERSION_MAJOR}::Xml)
 target_compile_definitions(mixxx-lib PUBLIC QT_TABLET_SUPPORT QT_USE_QSTRINGBUILDER)
 if(UNIX AND NOT APPLE)
-  find_package(X11 REQUIRED)
-  find_package(Qt5 COMPONENTS X11Extras DBus REQUIRED)
-  target_include_directories(mixxx-lib SYSTEM PUBLIC "${X11_INCLUDE_DIR}")
+  if(NOT QT6)
+    find_package(X11 REQUIRED)
+    find_package(Qt5 COMPONENTS X11Extras REQUIRED)
+    target_include_directories(mixxx-lib SYSTEM PUBLIC "${X11_INCLUDE_DIR}")
+    target_link_libraries(mixxx-lib PRIVATE "${X11_LIBRARIES}" Qt5::X11Extras)
+  endif()
+  find_package(Qt${QT_VERSION_MAJOR} COMPONENTS DBus REQUIRED)
   target_link_libraries(mixxx-lib PRIVATE
-    "${X11_LIBRARIES}"
-    Qt${QT_VERSION_MAJOR}::X11Extras
     Qt${QT_VERSION_MAJOR}::DBus
   )
 elseif(WIN32)
@@ -2665,7 +2678,11 @@ endif()
 # QtKeychain
 option(QTKEYCHAIN "Secure credentials storage support for Live Broadcasting profiles" ON)
 if(QTKEYCHAIN)
-  find_package(Qt5Keychain REQUIRED)
+  if(QT6)
+    find_package(Qt6Keychain REQUIRED)
+  else()
+    find_package(Qt5Keychain REQUIRED)
+  endif()
   target_compile_definitions(mixxx-lib PUBLIC __QTKEYCHAIN__)
   target_link_libraries(mixxx-lib PRIVATE ${QTKEYCHAIN_LIBRARIES})
   target_include_directories(mixxx-lib SYSTEM PUBLIC ${QTKEYCHAIN_INCLUDE_DIRS})
