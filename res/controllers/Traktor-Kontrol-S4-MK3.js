@@ -34,7 +34,13 @@ class Deck {
         for (let property in this) {
             if (Object.prototype.hasOwnProperty.call(this, property)) {
                 if (this[property] instanceof Component) {
+                    if (this[property].disconnect !== undefined && typeof this[property].disconnect === "function") {
+                        this[property].disconnect();
+                    }
                     this[property].group = newGroup;
+                    if (this[property].connect !== undefined && typeof this[property].connect === "function") {
+                        this[property].connect();
+                    }
                 }
             }
         }
@@ -43,7 +49,6 @@ class Deck {
         return "[Channel" + deckNumber + "]";
     }
 }
-
 
 class Button extends Component {
     constructor(group, inKey) {
@@ -71,6 +76,27 @@ class ToggleButton extends Button {
     }
 }
 
+class Pot extends Component {
+    constructor(group, inKey, max) {
+        super(group, inKey);
+        this.max = max;
+        this.firstValueReceived = false;
+    }
+    input(value) {
+        engine.setParameter(this.group, this.inKey, value/this.max);
+        if (!this.firstValueReceived) {
+            this.firstValueReceived = true;
+            this.connect();
+        }
+    }
+    connect() {
+        engine.softTakeover(this.group, this.inKey, true);
+    }
+    disconnect() {
+        engine.softTakeoverIgnoreNextValue(this.group, this.inKey);
+    }
+}
+
 const getBit = (byte, index) => {
     return (byte >> 8 - index) & 1;
 };
@@ -81,6 +107,7 @@ class S4MK3 {
         this.leftDeck = new Deck([1, 3]);
         this.leftDeck.playButton = new ToggleButton(this.leftDeck.group, "play");
         this.leftDeck.cueButton = new PushButton(this.leftDeck.group, "cue_default");
+        this.leftDeck.tempoFader = new Pot(this.leftDeck.group, "rate", this.potMax);
     }
     incomingData(data) {
         const reportId = data[0];
@@ -112,7 +139,7 @@ class S4MK3 {
             engine.setParameter("[Channel4]", "volume", view[4]/this.potMax);
 
             engine.setParameter("[Channel2]", "rate", view[5]/this.potMax);
-            engine.setParameter("[Channel1]", "rate", view[6]/this.potMax);
+            this.leftDeck.tempoFader.input(view[6]);
 
             engine.setParameter("[Channel3]", "pregain", view[7]/this.potMax);
             engine.setParameter("[Channel1]", "pregain", view[8]/this.potMax);
